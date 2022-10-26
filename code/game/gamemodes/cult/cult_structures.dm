@@ -53,7 +53,7 @@
 /obj/structure/cult/functional/examine(mob/user)
 	. = ..()
 	if(iscultist(user) && cooldowntime > world.time)
-		. += "<span class='cultitalic'>The magic in [src] is weak, it will be ready to use again in [get_ETA()].</span>"
+		. += "<span class='cult'>The magic in [src] is weak, it will be ready to use again in [get_ETA()].</span>"
 	. += "<span class='notice'>[src] is [anchored ? "":"not "]secured to the floor.</span>"
 
 /obj/structure/cult/functional/attackby(obj/item/I, mob/user, params)
@@ -327,3 +327,6 @@ GLOBAL_LIST_INIT(blacklisted_pylon_turfs, typecacheof(list(
 
 /obj/effect/gateway/Crossed(atom/movable/AM, oldloc)
 	return
+
+/obj/effect/clockwork/overlay/floor/bloodcult
+	icon_state = "cult"

@@ -347,7 +347,7 @@
 
 		to_chat(L, "<span class='italics'>You hear a voice in your head saying: </span><span class='abductor'>[message]</span>")
 		to_chat(user, "<span class='notice'>You send the message to your target.</span>")
-		log_say("[key_name(user)] sent an abductor mind message to [key_name(L)]: '[message]'", user)
+		add_say_logs(user, message, L, "Mind device")
 
 /obj/item/gun/energy/alien
 	name = "alien pistol"
@@ -570,13 +570,13 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	. = ..()
 	switch(mode)
 		if(BATON_STUN)
-			. += "<span class='warning'>The baton is in stun mode.</span>"
+			. += "<span class='notice'>The baton is in stun mode.</span>"
 		if(BATON_SLEEP)
-			. += "<span class='warning'>The baton is in sleep inducement mode.</span>"
+			. += "<span class='notice'>The baton is in sleep inducement mode.</span>"
 		if(BATON_CUFF)
-			. += "<span class='warning'>The baton is in restraining mode.</span>"
+			. += "<span class='notice'>The baton is in restraining mode.</span>"
 		if(BATON_PROBE)
-			. += "<span class='warning'>The baton is in probing mode.</span>"
+			. += "<span class='notice'>The baton is in probing mode.</span>"
 
 /obj/item/radio/headset/abductor
 	name = "alien headset"

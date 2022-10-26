@@ -43,7 +43,7 @@
 
 /datum/action/innate/revolution_recruitment/proc/choose_targets(mob/user = usr)
 	var/list/validtargets = list()
-	for(var/mob/living/M in view(user.client.view, get_turf(user)))
+	for(var/mob/living/carbon/human/M in view(user.client.view, get_turf(user)))
 		if(M && M.mind && M.stat == CONSCIOUS)
 			if(M == user)
 				continue
@@ -52,7 +52,7 @@
 			validtargets += M
 	if(!validtargets.len)
 		to_chat(usr, "<span class='warning'>There are no valid targets!</span>")
-	var/mob/living/target = input("Choose a target for recruitment.", "Targeting") as null|mob in validtargets
+	var/mob/living/carbon/human/target = input("Choose a target for recruitment.", "Targeting") as null|mob in validtargets
 	return target
 
 /datum/action/innate/revolution_recruitment/Activate()
@@ -63,12 +63,12 @@
 		to_chat(usr, "<span class='danger'>You must wait between attempts.")
 		return
 	usr.mind.rev_cooldown = world.time + 50
-	var/mob/living/recruit = choose_targets()
+	var/mob/living/carbon/human/recruit = choose_targets()
 	if(!recruit)
 		return
 	log_admin("[key_name(usr)] attempted recruitment [key_name(recruit)] into the revolution.", usr)
 	to_chat(usr, "<span class='info'><b>You are trying to recruit [recruit]: </b></span>")
-	if(ismindshielded(recruit))
+	if(ismindshielded(recruit) || (recruit.mind in SSticker.mode.get_living_heads()))
 		to_chat(recruit, "<span class='danger'><FONT size = 4>You were asked to join the revolution, but for reasons you did not know, you refused.")
 		to_chat(usr, "<span class='danger'>\The [recruit] does not support the revolution!")
 		return
@@ -121,7 +121,7 @@
 	heads_to_kill += heads
 
 	for(var/datum/mind/rev_mind in head_revolutionaries)
-		log_game("[key_name(rev_mind)] has been selected as a head rev")
+		add_game_logs("has been selected as a head rev", rev_mind.current)
 		forge_revolutionary_objectives(rev_mind)
 
 		addtimer(CALLBACK(src, .proc/equip_revolutionary, rev_mind.current), rand(10, 100))
@@ -231,7 +231,7 @@
 			var/datum/mind/stalin = pick(promotable_revs)
 			revolutionaries -= stalin
 			head_revolutionaries += stalin
-			log_game("[key_name(stalin)] has been promoted to a head rev")
+			add_game_logs("has been promoted to a head rev", stalin.current)
 			equip_revolutionary(stalin.current)
 			forge_revolutionary_objectives(stalin)
 			greet_revolutionary(stalin)
@@ -240,17 +240,11 @@
 //Deals with converting players to the revolution//
 ///////////////////////////////////////////////////
 /datum/game_mode/proc/add_revolutionary(datum/mind/rev_mind)
-	if(rev_mind.assigned_role in GLOB.command_positions)
-		return 0
-	var/mob/living/carbon/human/H = rev_mind.current//Check to see if the potential rev is implanted
-	if(ismindshielded(H))
-		return 0
 	if((rev_mind in revolutionaries) || (rev_mind in head_revolutionaries))
 		return 0
 	revolutionaries += rev_mind
 	to_chat(rev_mind.current, "<span class='danger'><FONT size = 3> You are now a revolutionary! Follow orders given by revolution leaders. Do not harm your fellow freedom fighters. You can identify your comrades by the red \"R\" icons, and your leaders by the blue \"R\" icons.</FONT></span>")
-	rev_mind.current.create_attack_log("<font color='red'>Has been recruited to the revolution!</font>")
-	rev_mind.current.create_log(CONVERSION_LOG, "recruited to the revolution")
+	add_conversion_logs(rev_mind.current, "recruited to the revolution")
 	rev_mind.special_role = SPECIAL_ROLE_REV
 	update_rev_icons_added(rev_mind)
 	if(jobban_isbanned(rev_mind.current, ROLE_REV) || jobban_isbanned(rev_mind.current, ROLE_SYNDICATE))
@@ -259,9 +253,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //Deals with players being converted from the revolution (Not a rev anymore)//  // Modified to handle borged MMIs.  Accepts another var if the target is being borged at the time  -- Polymorph.
 //////////////////////////////////////////////////////////////////////////////
-/datum/game_mode/proc/remove_revolutionary(datum/mind/rev_mind , beingborged)
+/datum/game_mode/proc/remove_revolutionary(datum/mind/rev_mind, beingborged)
 	var/remove_head = 0
-	if(beingborged && (rev_mind in head_revolutionaries))
+	if(rev_mind in head_revolutionaries)
 		head_revolutionaries -= rev_mind
 		remove_head = 1
 
@@ -270,11 +264,10 @@
 		rev_mind.special_role = null
 		for(var/datum/action/innate/revolution_recruitment/C in rev_mind.current.actions)
 			qdel(C)
-		rev_mind.current.create_attack_log("<font color='red'>Has renounced the revolution!</font>")
-		rev_mind.current.create_log(CONVERSION_LOG, "renounced the revolution")
+		add_conversion_logs(rev_mind.current, "renounced the revolution")
 		if(beingborged)
 			to_chat(rev_mind.current, "<span class='danger'><FONT size = 3>The frame's firmware detects and deletes your neural reprogramming! You remember nothing[remove_head ? "." : " but the name of the one who recruited you."]</FONT></span>")
-			message_admins("[key_name_admin(rev_mind.current)] [ADMIN_QUE(rev_mind.current,"?")] ([ADMIN_FLW(rev_mind.current,"FLW")]) has been borged while being a [remove_head ? "leader" : " member"] of the revolution.")
+			message_admins("[ADMIN_LOOKUPFLW(rev_mind.current)] has been borged while being a [remove_head ? "leader" : " member"] of the revolution.")
 		else
 			to_chat(rev_mind.current, "<span class='danger'><FONT size = 3>You have been brainwashed! You are no longer a revolutionary!</FONT></span>")
 

@@ -728,6 +728,17 @@
 	for(var/i in 1 to 7)
 		new	/obj/item/restraints/handcuffs/alien(src)
 
+/obj/item/storage/box/manacles
+	name = "box of spare manacles"
+	desc = "A box full of manacles. Old but gold."
+	icon = 'icons/obj/ninjaobjects.dmi'
+	icon_state = "box_manacle"
+
+/obj/item/storage/box/manacles/New()
+	..()
+	for(var/i in 1 to 7)
+		new	/obj/item/restraints/handcuffs/manacles(src)
+
 /obj/item/storage/box/fakesyndiesuit
 	name = "boxed space suit and helmet"
 	desc = "A sleek, sturdy box used to hold replica spacesuits."
@@ -770,21 +781,6 @@
 	new /obj/item/gun/projectile/automatic/pistol/enforcer/security(src) // loaded with rubber by default
 	new /obj/item/ammo_box/magazine/enforcer(src)
 	new /obj/item/ammo_box/magazine/enforcer(src)
-
-/obj/item/storage/box/erttaserproof
-	name = "Taser Proof Upgrade Box"
-	desc = "A Exclusive and Expencive upgrade for HardSuit ."
-	icon_state = "box_ert"
-
-/obj/item/storage/box/erttaserproof/New()
-	..()
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
-	new /obj/item/taser_proof_upgrade(src)
 
 /obj/item/storage/box/bartender_rare_ingredients_kit
 	name = "bartender rare reagents kit"
@@ -1212,7 +1208,7 @@
 /obj/item/storage/box/wizard/hardsuit/New()
 	. = ..()
 	contents = list()
-	new /obj/item/clothing/suit/space/hardsuit/shielded/wizard(src)
+	new /obj/item/clothing/suit/space/hardsuit/wizard/shielded(src)
 	new /obj/item/clothing/shoes/magboots/wizard(src)
 
 #undef NODESIGN
