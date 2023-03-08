@@ -147,6 +147,8 @@ Turf and target are seperate in case you want to teleport some distance from a t
 		return FALSE
 	if(A.tele_proof)
 		return TRUE
+	if(!is_teleport_allowed(O.z))
+		return TRUE
 	else
 		return FALSE
 
@@ -778,7 +780,7 @@ Returns 1 if the chain up to the area contains the given typepath
 
 						// Reset the shuttle corners
 						if(O.tag == "delete me")
-							X.icon = 'icons/turf/shuttle.dmi'
+							X.icon = 'icons/turf/shuttle/shuttle.dmi'
 							X.icon_state = replacetext(O.icon_state, "_f", "_s") // revert the turf to the old icon_state
 							X.name = "wall"
 							qdel(O) // prevents multiple shuttle corners from stacking
@@ -1247,33 +1249,36 @@ Standard way to write links -Sayu
 	return "<a href='?src=[D.UID()];[arglist]'>[content]</a>"
 
 
-
+// This proc is made to check if we can interact or use (directly or in the other way) the specific bodypart
+// Not to check if one clothing blocks access to the other clothing
+// for that we have flags_inv var
 /proc/get_location_accessible(mob/M, location)
 	var/covered_locations	= 0	//based on body_parts_covered
-	var/face_covered		= 0	//based on flags_inv
 	var/eyesmouth_covered	= 0	//based on flags_cover
 	if(iscarbon(M))
 		var/mob/living/carbon/C = M
 		for(var/obj/item/clothing/I in list(C.back, C.wear_mask))
 			covered_locations |= I.body_parts_covered
-			face_covered |= I.flags_inv
 			eyesmouth_covered |= I.flags_cover
 		if(ishuman(C))
 			var/mob/living/carbon/human/H = C
 			for(var/obj/item/I in list(H.wear_suit, H.w_uniform, H.shoes, H.belt, H.gloves, H.glasses, H.head, H.r_ear, H.l_ear, H.neck))
 				covered_locations |= I.body_parts_covered
-				face_covered |= I.flags_inv
 				eyesmouth_covered |= I.flags_cover
-
+	// If we check for mouth or eyes for gods sake use the appropriate flags for THEM!
+	// Not for the face, head e.t.c.
+	// HIDENAME(formerly known as HIDEFACE) flag was made to check if we appear as unknown
+	// HIDEGLASSES(formerly known as HIDEEYES) flag was made, ironically, to check if it hides our GLASSES
+	// not to check if it makes using the fucking mouth/eyes impossible!!!
 	switch(location)
 		if("head")
 			if(covered_locations & HEAD)
 				return 0
 		if("eyes")
-			if(face_covered & HIDEEYES || eyesmouth_covered & GLASSESCOVERSEYES || eyesmouth_covered & HEADCOVERSEYES)
+			if(eyesmouth_covered & MASKCOVERSEYES || eyesmouth_covered & GLASSESCOVERSEYES || eyesmouth_covered & HEADCOVERSEYES)
 				return 0
 		if("mouth")
-			if(covered_locations & HEAD || face_covered & HIDEFACE || eyesmouth_covered & MASKCOVERSMOUTH)
+			if(eyesmouth_covered & HEADCOVERSMOUTH || eyesmouth_covered & MASKCOVERSMOUTH)
 				return 0
 		if("chest")
 			if(covered_locations & UPPER_TORSO)
@@ -1799,10 +1804,8 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 			/obj/vehicle = "VEHICLE",
 			/obj = "O",
 			/datum = "D",
-			/turf/simulated/floor = "SIM_FLOOR",
-			/turf/simulated/wall = "SIM_WALL",
-			/turf/unsimulated/floor = "UNSIM_FLOOR",
-			/turf/unsimulated/wall = "UNSIM_WALL",
+			/turf/simulated/floor = "FLOOR",
+			/turf/simulated/wall = "WALL",
 			/turf = "T",
 			/mob/living/carbon/alien = "XENO",
 			/mob/living/carbon/human = "HUMAN",
@@ -2078,3 +2081,7 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 			return "White Noise"
 		if(CHANNEL_AMBIENCE)
 			return "Ambience"
+		if(CHANNEL_TTS_LOCAL)
+			return "TTS Local"
+		if(CHANNEL_TTS_RADIO)
+			return "TTS Radio"

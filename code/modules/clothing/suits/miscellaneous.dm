@@ -306,7 +306,7 @@
 	cold_protection = HEAD
 	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
 	flags = BLOCKHAIR
-	flags_inv = HIDEEARS
+	flags_inv = HIDEHEADSETS
 
 /obj/item/clothing/suit/hooded/salmon_costume
 	name = "salmon suit"
@@ -322,7 +322,7 @@
 	icon_state = "salmon"
 	body_parts_covered = HEAD
 	flags = BLOCKHAIR
-	flags_inv = HIDEEARS
+	flags_inv = HIDEHEADSETS
 
 /obj/item/clothing/suit/hooded/bee_costume // It's Hip!
 	name = "bee costume"
@@ -339,7 +339,7 @@
 	icon_state = "bee"
 	body_parts_covered = HEAD
 	flags = THICKMATERIAL|BLOCKHAIR
-	flags_inv = HIDEEARS
+	flags_inv = HIDEHEADSETS
 
 /obj/item/clothing/suit/bloated_human	//OH MY GOD WHAT HAVE YOU DONE!?!?!?
 	name = "bloated human suit"
@@ -386,7 +386,7 @@
 	cold_protection = HEAD
 	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
 	flags = BLOCKHAIR
-	flags_inv = HIDEEARS
+	flags_inv = HIDEHEADSETS
 
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/head.dmi',
@@ -579,7 +579,7 @@
 	body_parts_covered = HEAD
 	cold_protection = HEAD
 	flags = BLOCKHAIR
-	flags_inv = HIDEEARS
+	flags_inv = HIDEHEADSETS
 
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/head.dmi',
@@ -860,9 +860,9 @@
 	item_state = "mercy_hood"
 	permeability_coefficient = 0.01
 	flags = BLOCKHAIR
-	flags_cover = HEADCOVERSEYES | HEADCOVERSMOUTH
+	flags_cover = HEADCOVERSEYES
 	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 100, rad = 20, fire = 50, acid = 50)
-	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES
+	flags_inv = HIDEMASK|HIDEHEADSETS|HIDEGLASSES
 
 /obj/item/clothing/suit/jacket
 	name = "bomber jacket"
@@ -975,6 +975,31 @@
 		"Neara" = 'icons/mob/species/monkey/suit.dmi',
 		"Stok" = 'icons/mob/species/monkey/suit.dmi'
 		)
+
+/obj/item/clothing/suit/sovietcoat
+	name = "\improper Soviet greatcoat"
+	desc = "A military overcoat made of rough wool that is thick enough to provide excellent protection against the elements."
+	icon_state = "sovietcoat"
+	item_state = "sovietcoat"
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	armor = list(melee = 15, bullet = 15, laser = 15, energy = 5, bomb = 15, bio = 0, rad = 0, fire = 30, acid = 30)
+	cold_protection = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
+	heat_protection = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	allowed = list(/obj/item/flashlight,/obj/item/gun/energy,/obj/item/gun/projectile,/obj/item/ammo_box)
+
+/obj/item/clothing/suit/sovietcoat/officer
+	name = "\improper Soviet officer's greatcoat"
+	desc = "A military overcoat made with expensive wool. The U.S.S.P armband means it must belong to someone important."
+	icon_state = "sovietofficercoat"
+	item_state = "sovietofficercoat"
+	armor = list(melee = 25, bullet = 25, laser = 25, energy = 10, bomb = 20, bio = 0, rad = 0, fire = 30, acid = 30)
+
+/obj/item/clothing/suit/russiancoat
+	name = "russian coat"
+	desc = "Used in extremly cold fronts, made out of real bears."
+	item_state = "rus_coat"
+	icon_state = "rus_coat"
 
 /obj/item/clothing/suit/lordadmiral
 	name = "Lord Admiral's Coat"
@@ -1118,7 +1143,7 @@
 	throw_range = 2
 	w_class = WEIGHT_CLASS_TINY
 	flags = BLOCKHAIR
-	flags_inv = HIDEGLOVES|HIDEEARS|HIDEFACE
+	flags_inv = HIDEGLOVES|HIDEHEADSETS|HIDENAME
 
 // Suragi start
 // Suragi parent

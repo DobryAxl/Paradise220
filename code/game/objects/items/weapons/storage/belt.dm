@@ -279,6 +279,20 @@
 	storage_slots = 6
 	use_item_overlays = FALSE
 
+/obj/item/storage/belt/security/webbing/srt
+	name = "SRT webbing"
+	desc = "Unique and versatile chest rig, can hold SRT gear."
+
+/obj/item/storage/belt/security/webbing/srt/full/New()
+	..()
+	new /obj/item/flashlight/seclite(src)
+	new /obj/item/kitchen/knife/combat(src)
+	new /obj/item/restraints/handcuffs(src)
+	new /obj/item/restraints/handcuffs(src)
+	new /obj/item/grenade/flashbang(src)
+	new /obj/item/grenade/flashbang(src)
+	update_icon()
+
 /obj/item/storage/belt/soulstone
 	name = "soul stone belt"
 	desc = "Designed for ease of access to the shards during a fight, as to not let a single enemy spirit slip away"
@@ -386,6 +400,40 @@
 	new /obj/item/grenade/syndieminibomb(src) //2
 	new /obj/item/grenade/syndieminibomb(src)
 
+
+/obj/item/storage/belt/grenade/nonlethal/New()
+	..()
+	new /obj/item/grenade/smokebomb(src) //14
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/smokebomb(src)
+	new /obj/item/grenade/chem_grenade/teargas(src)	//6
+	new /obj/item/grenade/chem_grenade/teargas(src)
+	new /obj/item/grenade/chem_grenade/teargas(src)
+	new /obj/item/grenade/chem_grenade/teargas(src)
+	new /obj/item/grenade/chem_grenade/teargas(src)
+	new /obj/item/grenade/chem_grenade/teargas(src)
+	new /obj/item/grenade/chem_grenade/metalfoam(src) //4
+	new /obj/item/grenade/chem_grenade/metalfoam(src)
+	new /obj/item/grenade/chem_grenade/metalfoam(src)
+	new /obj/item/grenade/chem_grenade/metalfoam(src)
+	new /obj/item/grenade/chem_grenade/lube(src) //2
+	new /obj/item/grenade/chem_grenade/lube(src)
+	new /obj/item/grenade/chem_grenade/drugs(src) //2
+	new /obj/item/grenade/chem_grenade/drugs(src)
+	new /obj/item/grenade/gas/knockout(src)	//2
+	new /obj/item/grenade/gas/knockout(src)
+
 /obj/item/storage/belt/military/abductor
 	name = "agent belt"
 	desc = "A belt used by abductor agents."
@@ -428,6 +476,15 @@
 	new /obj/item/ammo_box/magazine/m45(src)
 	new /obj/item/ammo_box/magazine/m45(src)
 	update_icon()
+
+/obj/item/storage/belt/military/assault/soviet/full/New()
+	..()
+	new /obj/item/ammo_box/magazine/ak814(src)
+	new /obj/item/ammo_box/magazine/ak814(src)
+	new /obj/item/ammo_box/magazine/ak814(src)
+	new /obj/item/grenade/plastic/x4/thermite(src)
+	new /obj/item/grenade/plastic/x4/thermite(src)
+	new /obj/item/storage/pill_bottle/sovietstimulants(src)
 
 /obj/item/storage/belt/janitor
 	name = "janibelt"

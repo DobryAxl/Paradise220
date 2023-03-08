@@ -63,7 +63,7 @@
 			qdel(O)
 	else
 		if(O.simulated)
-			O.color = initial(O.color)
+			O.remove_atom_colour(WASHABLE_COLOUR_PRIORITY)
 		O.clean_blood()
 
 /datum/reagent/space_cleaner/reaction_turf(turf/T, volume)
@@ -75,7 +75,7 @@
 				floor_only = FALSE
 			else
 				qdel(C)
-		T.color = initial(T.color)
+		T.remove_atom_colour(WASHABLE_COLOUR_PRIORITY)
 		if(floor_only)
 			T.clean_blood()
 
@@ -86,12 +86,12 @@
 	M.clean_blood()
 
 /datum/reagent/blood
-	data = list("donor"=null,"viruses"=null,"blood_DNA"=null,"blood_type"=null,"blood_colour"="#A10808","resistances"=null,"trace_chem"=null,"mind"=null,"ckey"=null,"gender"=null,"real_name"=null,"cloneable"=null,"factions"=null, "dna" = null)
+	data = list("donor"=null,"viruses"=null,"blood_DNA"=null,"blood_type"=null,"blood_species"=null,"blood_colour"="#A10808","resistances"=null,"trace_chem"=null,"mind"=null,"ckey"=null,"gender"=null,"real_name"=null,"cloneable"=null,"factions"=null, "dna" = null)
 	name = "Blood"
 	id = "blood"
 	reagent_state = LIQUID
 	color = "#770000" // rgb: 40, 0, 0
-	metabolization_rate = 5 //fast rate so it disappears fast.
+	metabolization_rate = 12.5 * REAGENTS_METABOLISM //fast rate so it disappears fast.
 	drink_icon = "glass_red"
 	drink_name = "Glass of Tomato juice"
 	drink_desc = "Are you sure this is tomato juice?"
@@ -114,7 +114,7 @@
 	if(method == REAGENT_INGEST && iscarbon(M))
 		var/mob/living/carbon/C = M
 		if(C.get_blood_id() == "blood")
-			if((!data || !(data["blood_type"] in get_safe_blood(C.dna.blood_type))))
+			if(!data || !(data["blood_type"] in get_safe_blood(C.dna.blood_type)) || !(data["blood_species"] == C.dna.species.blood_species))
 				C.reagents.add_reagent("toxin", volume * 0.5)
 			else
 				C.blood_volume = min(C.blood_volume + round(volume, 0.1), BLOOD_VOLUME_NORMAL)
@@ -172,6 +172,60 @@
 		if(!blood_prop)
 			blood_prop = new(T)
 			blood_prop.blood_DNA["UNKNOWN DNA STRUCTURE"] = "X*"
+
+/datum/reagent/blood/synthetic
+	id = "sblood"
+
+/datum/reagent/blood/synthetic/reaction_mob(mob/living/M, method=REAGENT_TOUCH, volume)
+	if(data && data["viruses"])
+		for(var/thing in data["viruses"])
+			var/datum/disease/D = thing
+
+			if(D.spread_flags & SPECIAL || D.spread_flags & NON_CONTAGIOUS)
+				continue
+
+			if(method == REAGENT_TOUCH)
+				M.ContractDisease(D)
+			else //ingest, patch or inject
+				M.ForceContractDisease(D)
+
+/datum/reagent/blood/synthetic/vox
+	name = "Synthetic Blood"
+	id = "sbloodvox"
+	data = list("donor"=null,"viruses"=null,"blood_DNA"=null,"blood_type"=null,"blood_species"=null,"blood_colour"="#6093dc","resistances"=null,"trace_chem"=null,"mind"=null,"ckey"=null,"gender"=null,"real_name"=null,"cloneable"=null,"factions"=null, "dna" = null)
+	color = "#6093dc"
+
+/datum/reagent/blood/synthetic/vox/reaction_mob(mob/living/M, method=REAGENT_TOUCH, volume)
+	..()
+
+	if(method == REAGENT_INGEST && iscarbon(M))
+		var/mob/living/carbon/C = M
+		if(C.get_blood_id() == "blood")
+			if(!data || !(C.dna.species.blood_species == "Vox"))
+				C.reagents.add_reagent("toxin", volume * 0.5)
+				if(C.stat != DEAD)
+					C.adjustOxyLoss(4)
+			else
+				C.blood_volume = min(C.blood_volume + round(volume, 0.1), BLOOD_VOLUME_NORMAL)
+
+/datum/reagent/blood/synthetic/oxy
+	name = "Synthetic Blood"
+	id = "sbloodoxy"
+	data = list("donor"=null,"viruses"=null,"blood_DNA"=null,"blood_type"=null,"blood_species"=null,"blood_colour"="#e8479d","resistances"=null,"trace_chem"=null,"mind"=null,"ckey"=null,"gender"=null,"real_name"=null,"cloneable"=null,"factions"=null, "dna" = null)
+	color = "#e8479d"
+
+/datum/reagent/blood/synthetic/oxy/reaction_mob(mob/living/M, method=REAGENT_TOUCH, volume)
+	..()
+
+	if(method == REAGENT_INGEST && iscarbon(M))
+		var/mob/living/carbon/C = M
+		if(C.get_blood_id() == "blood")
+			if(!data || C.dna.species.blood_species == "Vox")
+				C.reagents.add_reagent("toxin", volume * 0.5)
+				if(C.stat != DEAD)
+					C.adjustOxyLoss(4)
+			else
+				C.blood_volume = min(C.blood_volume + round(volume, 0.1), BLOOD_VOLUME_NORMAL)
 
 /datum/reagent/vaccine
 	//data must contain virus type
@@ -358,7 +412,7 @@
 	id = "unholywater"
 	description = "Something that shouldn't exist on this plane of existance."
 	process_flags = ORGANIC | SYNTHETIC //ethereal means everything processes it.
-	metabolization_rate = 1
+	metabolization_rate = 2.5 * REAGENTS_METABOLISM
 	taste_description = "sulfur"
 
 /datum/reagent/fuel/unholywater/on_mob_life(mob/living/M)
@@ -386,7 +440,7 @@
 	id = "hell_water"
 	description = "YOUR FLESH! IT BURNS!"
 	process_flags = ORGANIC | SYNTHETIC		//Admin-bus has no brakes! KILL THEM ALL.
-	metabolization_rate = 1
+	metabolization_rate = 2.5 * REAGENTS_METABOLISM
 	can_synth = FALSE
 	taste_description = "burning"
 

@@ -18,7 +18,7 @@
 			playsound(src, W.usesound, 100, 1)
 			user.visible_message("[user] is slicing apart the [name]...", \
 								 "<span class='notice'>You are slicing apart the [name]...</span>")
-			if(do_after(user, 40 * W.toolspeed, target = src))
+			if(do_after(user, 40 * W.toolspeed * gettoolspeedmod(user), target = src))
 				if(!loc)
 					return
 				user.visible_message("[user] slices apart the [name].", \
@@ -250,6 +250,12 @@
 		spawn(20)
 			spam_flag = 0
 
+/obj/structure/statue/bananium/clown/unique
+	name = "статуя великого Хонкера"
+	desc = "Искусно слепленная статуя из бананиума, бананового сока и непонятного белого материала. Судя по его выдающейся улыбки, двум золотым гудкам в руках и наряду, он был лучшим стендапером и шутником на станции. Полное имя, к сожалению плохо читаемо и затерто, похоже кто-то явно завидовал его таланту."
+	icon_state = "clown_unique"
+	oreAmount = 20
+
 /obj/structure/statue/sandstone
 	max_integrity = 50
 	material_drop_type = /obj/item/stack/sheet/mineral/sandstone
@@ -284,6 +290,12 @@
 		to_chat(user, "It is fastened to the floor!")
 		return
 	setDir(turn(dir, 90))
+
+/obj/structure/statue/tranquillite/mime/unique
+	name = "статуя гордости пантомимы"
+	desc = "Искусно слепленная статуя из транквилиума, если приглядеться, то на статую надета старая униформа мима, перекрашенная под текстуру транквилиума, а рот статуи заклеен скотчем. Похоже кто-то полностью отдавал себя искусству пантомимы. На груди виднеется медаль с еле различимой закрашенной надписью \"За Отвагу\", поверх которой написано \"За Военные Преступления\"."
+	icon_state = "mime_unique"
+	oreAmount = 20
 
 /obj/structure/statue/kidanstatue
 	name = "Obsidian Kidan warrior statue"
@@ -335,6 +347,36 @@
 	anchored = TRUE
 	oreAmount = 0
 
+/obj/structure/statue/furukai
+	name = "София Вайт"
+	desc = "Загадочная девушка, ныне одна из множества офицеров синдиката. Получившая столь высокую позицию не за связи, а за свои способности. \
+			Движимая местью за потерю родной сестры из-за коррупционных верхушек Нанотрейзен, она вступила в Синдикат,  \
+			где стала известна и как способный агент и как отличный инженер. Хоть ее позывной и отсылал на пушистых, в душе она их ненавидела..."
+	icon = 'icons/obj/statuelarge.dmi'
+	icon_state = "furukai"
+	pixel_y = 7
+	anchored = TRUE
+	oreAmount = 0
+
+/obj/structure/statue/ell_good
+	name = "Mr.Буум"
+	desc = "Загадочный клоун с жёлтым оттенком кожи и выразительными зелёными глазами. Лучший двойной агент синдиката умудрявшийся захватить власть множества объектов. \
+			Его имя часто произносят неправильно из-за чего его заслуги по документам принадлежат сразу нескольким Буумам. \
+			Так же знаменит тем, что убедил руководство НТ тратить время, силы и средства, на золотой унитаз."
+	icon = 'icons/obj/statuelarge.dmi'
+	icon_state = "ell_good"
+	pixel_y = 7
+	anchored = TRUE
+	oreAmount = 0
+
+/obj/structure/statue/mooniverse
+	name = "Неизвестный агент"
+	desc = "Информация на табличке под статуей исцарапана и нечитабельна..."
+	icon = 'icons/obj/statuelarge.dmi'
+	icon_state = "mooniverse"
+	pixel_y = 7
+	anchored = TRUE
+	oreAmount = 0
 
 ////////////////////////////////
 

@@ -153,6 +153,12 @@
 /mob/living/proc/ObjBump(obj/O)
 	return
 
+/mob/living/get_pull_push_speed_modifier(current_delay)
+	if(!canmove)
+		return pull_push_speed_modifier * 1.2
+	var/average_delay = (movement_delay(TRUE) + current_delay) / 2
+	return current_delay > average_delay ? pull_push_speed_modifier : (average_delay / current_delay)
+
 //Called when we want to push an atom/movable
 /mob/living/proc/PushAM(atom/movable/AM, force = move_force)
 
@@ -188,7 +194,12 @@
 				return
 	if(pulling == AM)
 		stop_pulling()
-	AM.glide_size = src.glide_size
+
+	if(client)
+		client.current_move_delay *= AM.get_pull_push_speed_modifier(client.current_move_delay)
+		glide_for(client.current_move_delay)
+
+	AM.glide_size = glide_size
 	var/current_dir
 	if(isliving(AM))
 		current_dir = AM.dir
@@ -245,6 +256,9 @@
 		return FALSE
 	if(status_flags & FAKEDEATH)
 		return FALSE
+	return ..()
+
+/mob/living/run_pointed(atom/A)
 	if(!..())
 		return FALSE
 	var/obj/item/hand_item = get_active_hand()
@@ -296,18 +310,24 @@
 		message_admins("[key_name_admin(user)] set [key_name_admin(src)] on fire with [I]")
 		add_attack_logs(user, src, "set on fire with [I]")
 
-/mob/living/proc/updatehealth(reason = "none given")
+/mob/living/update_stat(reason = "none given", should_log = FALSE)
 	if(status_flags & GODMODE)
-		health = maxHealth
-		stat = CONSCIOUS
-		return
-	health = maxHealth - getOxyLoss() - getToxLoss() - getFireLoss() - getBruteLoss() - getCloneLoss()
-
-	update_stat("updatehealth([reason])")
+		if(stat != CONSCIOUS && stat != DEAD)
+			WakeUp()
 	med_hud_set_health()
 	med_hud_set_status()
 	update_health_hud()
+	update_damage_hud()
+	if(should_log)
+		log_debug("[src] update_stat([reason][status_flags & GODMODE ? ", GODMODE" : ""])")
 
+/mob/living/proc/updatehealth(reason = "none given", should_log = FALSE)
+	if(status_flags & GODMODE)
+		health = maxHealth
+		update_stat("updatehealth([reason])", should_log)
+		return
+	health = maxHealth - getOxyLoss() - getToxLoss() - getFireLoss() - getBruteLoss() - getCloneLoss()
+	update_stat("updatehealth([reason])", should_log)
 
 //This proc is used for mobs which are affected by pressure to calculate the amount of pressure that actually
 //affects them once clothing is factored in. ~Errorage
@@ -494,7 +514,7 @@
 			human_mob.restore_blood()
 			human_mob.decaylevel = 0
 			human_mob.remove_all_embedded_objects()
-
+	SEND_SIGNAL(src, COMSIG_LIVING_AHEAL)
 	restore_all_organs()
 	surgeries.Cut() //End all surgeries.
 	if(stat == DEAD)
@@ -575,11 +595,30 @@
 			return
 
 		var/pull_dir = get_dir(src, pulling)
+		pulling.glide_size = glide_size
 		if(get_dist(src, pulling) > 1 || (moving_diagonally != SECOND_DIAG_STEP && ((pull_dir - 1) & pull_dir))) // puller and pullee more than one tile away or in diagonal position
 			if(isliving(pulling))
 				var/mob/living/M = pulling
 				if(M.lying && !M.buckled && (prob(M.getBruteLoss() * 200 / M.maxHealth)))
 					M.makeTrail(dest)
+				if(ishuman(pulling))
+					var/mob/living/carbon/human/H = pulling
+					var/obj/item/organ/external/head
+					if(!H.lying)
+						if(H.confused > 0 && prob(4))
+							H.setStaminaLoss(100)
+							head = H.get_organ("head")
+							head?.receive_damage(5, 0, FALSE)
+							pulling.stop_pulling()
+							visible_message("<span class='danger'>Ноги [H] путаются и [genderize_ru(H.gender,"он","она","оно","они")] с грохотом падает на пол, сильно ударяясь головой!</span>")
+						if(H.m_intent == MOVE_INTENT_WALK && prob(4))
+							H.setStaminaLoss(100)
+							head = H.get_organ("head")
+							head?.receive_damage(5, 0, FALSE)
+							visible_message("<span class='danger'>[H] не поспевает за [src] и с грохотом падает на пол, сильно ударяясь головой!</span>")
+			else
+				pulling.pixel_x = initial(pulling.pixel_x)
+				pulling.pixel_y = initial(pulling.pixel_y)
 			pulling.Move(dest, get_dir(pulling, dest), movetime) // the pullee tries to reach our previous position
 			if(pulling && get_dist(src, pulling) > 1) // the pullee couldn't keep up
 				stop_pulling()
@@ -718,6 +757,10 @@
 	set name = "Resist"
 	set category = "IC"
 
+	DEFAULT_QUEUE_OR_CALL_VERB(VERB_CALLBACK(src, .proc/run_resist))
+
+///proc extender of [/mob/living/verb/resist] meant to make the process queable if the server is overloaded when the verb is called
+/mob/living/proc/run_resist()
 	if(!can_resist())
 		return
 	changeNext_move(CLICK_CD_RESIST)

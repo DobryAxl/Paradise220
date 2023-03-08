@@ -201,6 +201,7 @@
 		return FALSE
 	var/turf/location = get_turf(src)
 	location.hotspot_expose(700, 50, 1)
+	SEND_SIGNAL(src, COMSIG_LIVING_FIRE_TICK)
 	return TRUE
 
 /mob/living/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume, global_overlay = TRUE)
@@ -261,7 +262,10 @@
 
 	for(var/obj/item/grab/G in grabbed_by)
 		if(G.assailant == user)
-			to_chat(user, "<span class='notice'>[pluralize_ru(user.gender,"Ты","Вы")] уже схватил[genderize_ru(user.gender,"","а","о","и")] [src.declent_ru(ACCUSATIVE)].</span>")
+			if(holder_type)
+				get_scooped(user)
+			else
+				to_chat(user, "<span class='notice'>[pluralize_ru(user.gender,"Ты","Вы")] уже схватил[genderize_ru(user.gender,"","а","о","и")] [src.declent_ru(ACCUSATIVE)].</span>")
 			return
 
 	add_attack_logs(user, src, "Grabbed passively", ATKLOG_ALL)
@@ -308,6 +312,8 @@
 /mob/living/attack_animal(mob/living/simple_animal/M)
 	M.face_atom(src)
 	if((M.a_intent == INTENT_HELP && M.ckey) || M.melee_damage_upper == 0)
+		if(!M.friendly)
+			return FALSE
 		if(handle_emote_CD())
 			return
 		M.custom_emote(1, "[M.friendly] [src.declent_ru(ACCUSATIVE)].")

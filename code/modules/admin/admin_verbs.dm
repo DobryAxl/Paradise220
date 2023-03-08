@@ -34,6 +34,7 @@ GLOBAL_LIST_INIT(admin_verbs_admin, list(
 	/client/proc/admin_deny_shuttle,	/*toggles availability of shuttle calling*/
 	/client/proc/check_ai_laws,			/*shows AI and borg laws*/
 	/client/proc/manage_silicon_laws,	/* Allows viewing and editing silicon laws. */
+	/client/proc/open_borgopanel,		/* Opens Cyborg Panel to change anything in it */
 	/client/proc/admin_memo,			/*admin memo system. show/delete/write. +SERVER needed to delete admin memos of others*/
 	/client/proc/dsay,					/*talk in deadchat using our ckey/fakekey*/
 	/client/proc/toggleprayers,			/*toggles prayers on/off*/
@@ -171,7 +172,10 @@ GLOBAL_LIST_INIT(admin_verbs_debug, list(
 	/client/proc/dmjit_debug_dump_call_count,
 	/client/proc/dmjit_debug_dump_opcode_count,
 	/client/proc/dmjit_debug_toggle_hooks,
-	/client/proc/dmjit_debug_dump_deopts
+	/client/proc/dmjit_debug_dump_deopts,
+	/client/proc/timer_log,
+	/client/proc/debug_timers,
+	/client/proc/force_verb_bypass,
 	))
 GLOBAL_LIST_INIT(admin_verbs_possess, list(
 	/proc/possess,
@@ -690,6 +694,7 @@ GLOBAL_LIST_INIT(admin_verbs_ticket, list(
 		ptypes += "Shamebrero"
 		ptypes += "Dust"
 		ptypes += "Shitcurity Goblin"
+		ptypes += "High RP"
 	var/punishment = input("How would you like to smite [M]?", "Its good to be baaaad...", "") as null|anything in ptypes
 	if(!(punishment in ptypes))
 		return
@@ -810,6 +815,30 @@ GLOBAL_LIST_INIT(admin_verbs_ticket, list(
 			var/mob/living/simple_animal/hostile/shitcur_goblin/goblin = new (T)
 			goblin.GiveTarget(M)
 			logmsg = "shitcurity goblin"
+		if("High RP")
+			var/obj/item/organ/internal/high_rp_tumor/hrp_tumor = H.get_int_organ(/obj/item/organ/internal/high_rp_tumor)
+			if(!hrp_tumor)
+				var/list/effect_variants = list("15 - 50", "30 - 45", "30 - 75",
+				"30 - 100", "60 - 100", "60 - 150", "60 - 200", "custom")
+				var/effect_strength = input("What effect strength do you want?(delay in seconds -  oxy damage)", "") as null|anything in effect_variants
+				var/pdelay
+				var/oxy_dmg
+				if(effect_strength == "custom")
+					pdelay = input("Input pump delay.") as num|null
+					oxy_dmg = input("Input oxy damage.") as num|null
+				else
+					var/list/strenght = text2numlist(effect_strength, " - ")
+					pdelay = strenght[1]
+					oxy_dmg = strenght[2]
+				H.curse_high_rp(pdelay*10, oxy_dmg)
+				H.mind.curses += "high_rp"
+				logmsg = "high rp([pdelay] - [oxy_dmg])"
+			else
+				hrp_tumor.remove(H)
+				qdel(hrp_tumor)
+				H.mind.curses -= "high_rp"
+				logmsg = "high rp(cure)"
+
 	if(logmsg)
 		log_and_message_admins("smited [key_name_log(M)] with: [logmsg]")
 
@@ -921,6 +950,7 @@ GLOBAL_LIST_INIT(admin_verbs_ticket, list(
 	deadmin()
 	verbs += /client/proc/readmin
 	GLOB.deadmins += ckey
+	update_active_keybindings()
 	to_chat(src, "<span class='interface'>You are now a normal player.</span>")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "De-admin") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
@@ -1009,6 +1039,7 @@ GLOBAL_LIST_INIT(admin_verbs_ticket, list(
 		D.associate(C)
 		message_admins("[key_name_admin(usr)] re-adminned themselves.")
 		log_admin("[key_name(usr)] re-adminned themselves.")
+		update_active_keybindings()
 		GLOB.deadmins -= ckey
 		SSblackbox.record_feedback("tally", "admin_verb", 1, "Re-admin")
 		return

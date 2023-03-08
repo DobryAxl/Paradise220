@@ -12,15 +12,26 @@
 	speak_emote = list("barks", "woofs")
 	emote_hear = list("barks!", "woofs!", "yaps.", "pants.")
 	emote_see = list("shakes its head.", "chases its tail.", "shivers.")
+	tts_seed = "Stetmann"
 	faction = list("neutral")
+	maxHealth = 50
+	health = 50
+	melee_damage_type = STAMINA
+	melee_damage_lower = 6
+	melee_damage_upper = 10
+	attacktext = "кусает"
 	see_in_dark = 5
 	speak_chance = 1
 	turns_per_move = 10
 	gold_core_spawnable = FRIENDLY_SPAWN
 	var/bark_sound = list('sound/creatures/dog_bark1.ogg','sound/creatures/dog_bark2.ogg') //Used in emote.
+	var/growl_sound = list('sound/creatures/dog_grawl1.ogg','sound/creatures/dog_grawl2.ogg') //Used in emote.
 	var/yelp_sound = 'sound/creatures/dog_yelp.ogg' //Used on death.
 	var/last_eaten = 0
 	footstep_type = FOOTSTEP_MOB_CLAW
+	butcher_results = list(/obj/item/reagent_containers/food/snacks/meat/dog = 4)
+	collar_type = "dog"
+
 
 /mob/living/simple_animal/pet/dog/verb/chasetail()
 	set name = "Chase your tail"
@@ -66,6 +77,7 @@
 		if("growl")
 			message = "growls!"
 			m_type = 2 //audible
+			playsound(src, pick(src.growl_sound), 75, TRUE)
 		if("help")
 			to_chat(src, "scream, bark, growl")
 
@@ -90,15 +102,6 @@
 				custom_emote(1, "growls!")
 
 //Corgis and pugs are now under one dog subtype
-
-/mob/living/simple_animal/pet/dog/detective
-	name = "Гав-Гавыч"
-	desc = "Старый служебный пёс. Он давно потерял нюх, однако детектив по-прежнему содержит и заботится о нём."
-	icon_state = "blackdog"
-	icon_living = "blackdog"
-	icon_dead = "blackdog_dead"
-	icon_resting = "blackdog_rest"
-
 /mob/living/simple_animal/pet/dog/corgi
 	name = "\improper corgi"
 	real_name = "corgi"
@@ -114,6 +117,8 @@
 	var/obj/item/inventory_back
 	var/shaved = FALSE
 	var/nofur = FALSE 		//Corgis that have risen past the material plane of existence.
+	tts_seed = "Stetmann"
+	holder_type = /obj/item/holder/corgi
 
 /mob/living/simple_animal/pet/dog/corgi/Initialize(mapload)
 	. = ..()
@@ -460,6 +465,7 @@
 		icon_dead = "old_corgi_dead"
 		desc = "At a ripe old age of [record_age], Ian's not as spry as he used to be, but he'll always be the HoP's beloved corgi." //RIP
 		turns_per_move = 20
+		holder_type = /obj/item/holder/old_corgi
 
 /mob/living/simple_animal/pet/dog/corgi/Ian/persistent_save()
 	write_memory(FALSE)
@@ -585,6 +591,13 @@
 	gold_core_spawnable = NO_SPAWN
 	nofur = TRUE
 	unique_pet = TRUE
+	tts_seed = "Mannoroth"
+	holder_type = /obj/item/holder/narsian
+	maxHealth = 300
+	health = 300
+	melee_damage_type = STAMINA	//Пади ниц!
+	melee_damage_lower = 50
+	melee_damage_upper = 100
 
 /mob/living/simple_animal/pet/dog/corgi/narsie/Life()
 	..()
@@ -622,6 +635,8 @@
 	gold_core_spawnable = NO_SPAWN
 	nofur = TRUE
 	unique_pet = TRUE
+	maxHealth = 100
+	health = 100
 
 /mob/living/simple_animal/pet/dog/corgi/ratvar/update_corgi_fluff()
 	..()
@@ -644,6 +659,10 @@
 	pass_flags = PASSMOB
 	mob_size = MOB_SIZE_SMALL
 	collar_type = "puppy"
+	tts_seed = "Jaina"
+	maxHealth = 20
+	health = 20
+	butcher_results = list(/obj/item/reagent_containers/food/snacks/meat/corgi = 1)
 
 //puppies cannot wear anything.
 /mob/living/simple_animal/pet/dog/corgi/puppy/Topic(href, href_list)
@@ -663,9 +682,25 @@
 	unsuitable_atmos_damage = 0
 	minbodytemp = TCMB
 	maxbodytemp = T0C + 40
+	tts_seed = "Kael"
+	holder_type = /obj/item/holder/void_puppy
+	maxHealth = 60
+	health = 60
 
 /mob/living/simple_animal/pet/dog/corgi/puppy/void/Process_Spacemove(movement_dir = 0)
 	return 1	//Void puppies can navigate space.
+
+/mob/living/simple_animal/pet/dog/corgi/puppy/slime
+	name = "\improper slime puppy"
+	real_name = "slimy"
+	desc = "Крайне склизкий. Но прикольный!"
+	icon_state = "slime_puppy"
+	icon_living = "slime_puppy"
+	icon_dead = "slime_puppy_dead"
+	nofur = TRUE
+	holder_type = /obj/item/holder/slime_puppy
+	minbodytemp = 250 //Weak to cold
+	maxbodytemp = INFINITY
 
 //LISA! SQUEEEEEEEEE~
 /mob/living/simple_animal/pet/dog/corgi/Lisa
@@ -683,6 +718,8 @@
 	response_harm   = "kicks"
 	var/turns_since_scan = 0
 	var/puppies = 0
+	tts_seed = "Luna"
+	holder_type = /obj/item/holder/lisa
 
 //Lisa already has a cute bow!
 /mob/living/simple_animal/pet/dog/corgi/Lisa/Topic(href, href_list)
@@ -725,6 +762,7 @@
 	icon_living = "borgi"
 	bark_sound = null	//No robo-bjork...
 	yelp_sound = null	//Or robo-Yelp.
+	tts_seed = "Glados"
 	var/emagged = 0
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
@@ -733,6 +771,7 @@
 	deathmessage = "blows apart!"
 	animal_species = /mob/living/simple_animal/pet/dog/corgi/borgi
 	nofur = TRUE
+	holder_type = /obj/item/holder/borgi
 
 /mob/living/simple_animal/pet/dog/corgi/borgi/emag_act(user as mob)
 	if(!emagged)
@@ -790,6 +829,10 @@
 	icon_dead = "pug_dead"
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/meat/pug = 3)
 	collar_type = "pug"
+	tts_seed = "Kleiner"
+	holder_type = /obj/item/holder/pug
+	maxHealth = 30
+	health = 30
 
 /mob/living/simple_animal/pet/dog/pug/handle_automated_movement()
 	. = ..()
@@ -800,3 +843,44 @@
 				for(var/i in list(1, 2, 4, 8, 4, 2, 1, 2, 4, 8, 4, 2, 1, 2, 4, 8, 4, 2))
 					dir = i
 					sleep(1)
+
+/mob/living/simple_animal/pet/dog/bullterrier
+	name = "\improper bullterrier"
+	real_name = "bullterrier"
+	desc = "Кого-то его мордочка напоминает..."
+	icon = 'icons/mob/pets.dmi'
+	icon_state = "bullterrier"
+	icon_living = "bullterrier"
+	icon_dead = "bullterrier_dead"
+	//tts_seed = "Kleiner"
+	holder_type = /obj/item/holder/bullterrier
+
+/mob/living/simple_animal/pet/dog/tamaskan
+	name = "\improper tamaskan"
+	real_name = "tamaskan"
+	desc = "Хорошая семейная собака. Уживается с другими собаками и ассистентами."
+	icon = 'icons/mob/pets.dmi'
+	icon_state = "tamaskan"
+	icon_living = "tamaskan"
+	icon_dead = "tamaskan_dead"
+	//tts_seed = "Kleiner"
+	holder_type = /obj/item/holder/bullterrier
+
+/mob/living/simple_animal/pet/dog/german
+	name = "\improper german"
+	real_name = "german"
+	desc = "Немецкая овчарка с помесью двортерьера. Судя по крупу - явно не породистый."
+	icon = 'icons/mob/pets.dmi'
+	icon_state = "german"
+	icon_living = "german"
+	icon_dead = "german_dead"
+	//tts_seed = "Kleiner"
+
+/mob/living/simple_animal/pet/dog/brittany
+	name = "\improper brittany"
+	real_name = "brittany"
+	desc = "Старая порода, которую любят аристократы."
+	icon = 'icons/mob/pets.dmi'
+	icon_state = "brittany"
+	icon_living = "brittany"
+	icon_dead = "brittany_dead"

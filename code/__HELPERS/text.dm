@@ -34,11 +34,20 @@
 
 //Removes a few problematic characters
 /proc/sanitize_simple(var/t,var/list/repl_chars = list("\n"="#","\t"="#"))
-	if(config && config.twitch_censor)
-		repl_chars += config.twich_censor_list
 	for(var/char in repl_chars)
 		t = replacetext(t, char, repl_chars[char])
 	return t
+
+/proc/sanitize_censored_patterns(var/t)
+	if(!config || !config.twitch_censor || !config.twich_censor_list)
+		return t
+
+	var/text = sanitize_simple(t, config.twich_censor_list)
+	if(t != text)
+		message_admins("CENSOR DETECTION: [ADMIN_FULLMONTY(usr)] inputs: \"[html_encode(t)]\"")
+		log_adminwarn("CENSOR DETECTION: [key_name_log(usr)] inputs: \"[t]\"")
+
+	return text
 
 /proc/readd_quotes(var/t)
 	var/list/repl_chars = list("&#34;" = "\"")
@@ -51,7 +60,12 @@
 
 //Runs byond's sanitization proc along-side sanitize_simple
 /proc/sanitize(var/t,var/list/repl_chars = null)
-	return html_encode(sanitize_simple(t,repl_chars))
+	return sanitize_censored_patterns(html_encode(sanitize_simple(t,repl_chars)))
+
+// Gut ANYTHING that isnt alphanumeric, or brackets
+/proc/filename_sanitize(t)
+	var/regex/alphanum_only = regex("\[^a-zA-Z0-9._/-]", "g")
+	return alphanum_only.Replace(t, "")
 
 // Gut ANYTHING that isnt alphanumeric, or brackets
 /proc/paranoid_sanitize(t)
@@ -237,9 +251,12 @@
  * Text modification
  */
 // See bygex.dm
-/proc/replace_characters(var/t,var/list/repl_chars)
+/proc/replace_characters(var/t,var/list/repl_chars, case_sensitive = FALSE)
 	for(var/char in repl_chars)
-		t = replacetext_char(t, char, repl_chars[char])
+		if(case_sensitive)
+			t = replacetextEx_char(t, char, repl_chars[char])
+		else
+			t = replacetext_char(t, char, repl_chars[char])
 	return t
 
 //Strips the first char and returns it and the new string as a list
@@ -533,7 +550,9 @@
 		text = replacetext(text, "\[station\]", "[station_name()]")
 		if(!no_font)
 			if(P)
-				text = "<font face=\"[deffont]\" color=[P ? P.colour : "black"]>[text]</font>"
+				text = "<font face=\"[P.fake_signing ? signfont : deffont]\" color=[P ? P.colour : "black"]>[text]</font>"
+				if(P.fake_signing) //or this, or one string in Kmetres
+					text = "<I>[text]</I>"
 			else
 				text = "<font face=\"[deffont]\">[text]</font>"
 
@@ -542,6 +561,7 @@
 
 /proc/convert_pencode_arg(text, tag, arg)
 	arg = sanitize_simple(html_encode(arg), list("''"="","\""="", "?"=""))
+	arg = sanitize_censored_patterns(arg)
 	// https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#rule-4---css-escape-and-strictly-validate-before-inserting-untrusted-data-into-html-style-property-values
 	var/list/style_attacks = list("javascript:", "expression", "byond:", "file:")
 

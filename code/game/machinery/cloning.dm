@@ -282,6 +282,7 @@ GLOBAL_LIST_INIT(cloner_biomass_items, list(\
 	if(is_taipan(z))
 		H.faction.Add("syndicate")	//Чтобы синдикатовцы после клонирования оставались синдикатовцами
 
+
 	domutcheck(H, null, MUTCHK_FORCED) //Ensures species that get powers by the species proc handle_dna keep them
 
 	if(efficiency > 2 && efficiency < 5 && prob(25))
@@ -301,6 +302,8 @@ GLOBAL_LIST_INIT(cloner_biomass_items, list(\
 	//Get the clone body ready
 	maim_clone(H)
 	H.Paralyse(4)
+
+	H.tts_seed = SStts.get_random_seed(H)
 
 	if(grab_ghost_when == CLONER_FRESH_CLONE)
 		clonemind.transfer_to(H)

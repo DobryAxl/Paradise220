@@ -454,6 +454,8 @@
 	set category = "Object"
 	set src in oview(1)
 
+	if(usr.default_can_use_topic(src) != STATUS_INTERACTIVE)
+		return
 	if(usr.incapacitated()) //are you cuffed, dying, lying, stunned or other
 		return
 
@@ -527,6 +529,8 @@
 		add_fingerprint(user)
 		if(user.pulling == L)
 			user.stop_pulling()
+		if(L.grabbed_by)
+			QDEL_LIST(L.grabbed_by)
 		SStgui.update_uis(src)
 		return
 	return

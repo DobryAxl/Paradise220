@@ -29,7 +29,8 @@ GLOBAL_LIST_EMPTY(event_last_fired)
 	if(delayed)
 		next_event_time += (world.time - last_world_time)
 	else if(world.time > next_event_time)
-		start_event()
+		if(config.allow_random_events)
+			start_event()
 
 	last_world_time = world.time
 
@@ -164,7 +165,6 @@ GLOBAL_LIST_EMPTY(event_last_fired)
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Ионный шторм",				/datum/event/ion_storm, 				0,		list(ASSIGNMENT_AI = 50, ASSIGNMENT_CYBORG = 50, ASSIGNMENT_ENGINEER = 15, ASSIGNMENT_SCIENTIST = 5)),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Нашествие бореров",		/datum/event/borer_infestation, 		40,		list(ASSIGNMENT_SECURITY = 30), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Несдвигаемый стержень",	/datum/event/immovable_rod,				0,		list(ASSIGNMENT_ENGINEER = 30), TRUE),
-		//new /datum/event_meta/ninja(EVENT_LEVEL_MODERATE, "Space Ninja",		/datum/event/space_ninja, 				0,		list(ASSIGNMENT_SECURITY = 15), TRUE),
 		// NON-BAY EVENTS
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Массовые галлюцинации",	/datum/event/mass_hallucination,		300),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Цифровой вирус",			/datum/event/brand_intelligence,		50, 	list(ASSIGNMENT_ENGINEER = 25),	TRUE),
@@ -183,7 +183,8 @@ GLOBAL_LIST_EMPTY(event_last_fired)
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Спавн морфа", 				/datum/event/spawn_morph, 				40,		list(ASSIGNMENT_SECURITY = 10), is_one_shot = TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Вспышка болезни",			/datum/event/disease_outbreak, 			0,		list(ASSIGNMENT_MEDICAL = 150), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Хедкрабы",					/datum/event/headcrabs, 				0,		list(ASSIGNMENT_SECURITY = 20)),
-		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Сбой работы дверей",		/datum/event/door_runtime,				50,		list(ASSIGNMENT_ENGINEER = 25, ASSIGNMENT_AI = 150), TRUE)
+		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Сбой работы дверей",		/datum/event/door_runtime,				50,		list(ASSIGNMENT_ENGINEER = 25, ASSIGNMENT_AI = 150), TRUE),
+		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Космический ниндзя",		/datum/event/space_ninja, 				40,		list(ASSIGNMENT_SECURITY = 10), is_one_shot = TRUE),
 	)
 
 /datum/event_container/major
@@ -196,7 +197,7 @@ GLOBAL_LIST_EMPTY(event_last_fired)
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Блоб",			/datum/event/blob, 				30,						list(ASSIGNMENT_ENGINEER =  5), TRUE),	// 6.9% on high pop, 5.5% on low pop
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Метеорный вал",	/datum/event/meteor_wave,		30,						list(ASSIGNMENT_ENGINEER =  5),	TRUE),	// 6.9% on high pop, 5.5% on low pop
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Визит абдукторов",/datum/event/abductor, 		    20, 					list(ASSIGNMENT_SECURITY =  3), TRUE),	// 5.8% on high pop, 4.5% on low pop
-		new /datum/event_meta/alien(EVENT_LEVEL_MAJOR, "Alien Infestation",	/datum/event/alien_infestation, 		0,		list(ASSIGNMENT_SECURITY = 15), TRUE),
+		new /datum/event_meta/alien(EVENT_LEVEL_MAJOR, "Заражение ксеноморфами",	/datum/event/alien_infestation, 		20,		list(ASSIGNMENT_SECURITY = 4), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Торговцы",		/datum/event/traders,			85, is_one_shot = TRUE),										// 8.4% on high pop, 9.4% on low pop
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Пауки Ужаса",		/datum/event/spider_terror, 	20,						list(ASSIGNMENT_SECURITY = 4), TRUE),	// 7.1% on high pop, 5.3% on low pop
 		new /datum/event_meta(EVENT_LEVEL_MAJOR, "Демон Резни",		/datum/event/spawn_slaughter,	10,  is_one_shot = TRUE)	// 3% on high pop, 2.1% on low pop

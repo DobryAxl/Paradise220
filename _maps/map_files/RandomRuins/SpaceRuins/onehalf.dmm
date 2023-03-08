@@ -67,9 +67,6 @@
 	},
 /turf/template_noop,
 /area/space/nearstation)
-"aj" = (
-/turf/unsimulated/floor/plating/airless,
-/area/ruin/onehalf/hallway)
 "ak" = (
 /turf/simulated/wall,
 /area/ruin/onehalf/hallway)
@@ -162,7 +159,7 @@
 /area/ruin/onehalf/hallway)
 "ay" = (
 /obj/structure/table_frame,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "az" = (
@@ -227,7 +224,7 @@
 /turf/template_noop,
 /area/ruin/onehalf/hallway)
 "aI" = (
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "aJ" = (
@@ -362,12 +359,12 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "aU" = (
 /obj/item/stack/sheet/metal,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "aV" = (
@@ -410,8 +407,8 @@
 /obj/structure/closet/crate/medical,
 /obj/item/clothing/accessory/stethoscope,
 /obj/item/healthanalyzer,
-/obj/item/reagent_containers/iv_bag/blood/OMinus,
-/obj/item/reagent_containers/iv_bag/blood/OMinus,
+/obj/item/reagent_containers/iv_bag/bloodsynthetic/oxygenis,
+/obj/item/reagent_containers/iv_bag/bloodsynthetic/oxygenis,
 /obj/machinery/power/apc/noalarm{
 	dir = 4;
 	keep_preset_name = 1;
@@ -467,7 +464,7 @@
 	d2 = 4;
 	icon_state = "1-4"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "be" = (
@@ -481,7 +478,7 @@
 	dir = 2;
 	icon_state = "coil_red2"
 	},
-/turf/unsimulated/floor/plating/airless,
+/turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bf" = (
 /obj/structure/disposalpipe/segment{
@@ -493,7 +490,7 @@
 	icon_state = "4-8";
 	tag = ""
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bg" = (
@@ -513,7 +510,7 @@
 	d2 = 4;
 	icon_state = "1-4"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bh" = (
@@ -534,7 +531,7 @@
 	icon_state = "pipe-b";
 	dir = 4
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bj" = (
@@ -648,14 +645,14 @@
 /obj/structure/disposalpipe/segment{
 	dir = 4
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bv" = (
 /obj/structure/disposalpipe/segment{
 	dir = 4
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bw" = (
@@ -669,7 +666,7 @@
 /obj/structure/disposalpipe/segment{
 	dir = 4
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "by" = (
@@ -679,7 +676,7 @@
 /area/ruin/onehalf/drone_bay)
 "bz" = (
 /obj/structure/closet/emcloset,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bA" = (
@@ -746,18 +743,18 @@
 /area/ruin/onehalf/drone_bay)
 "bJ" = (
 /obj/structure/girder,
-/turf/unsimulated/floor/plating/airless,
+/turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bK" = (
 /obj/machinery/vending/coffee{
 	name = "\improper Solar's Best Hot Drinks"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bL" = (
 /obj/machinery/vending/snack,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "bM" = (
@@ -793,7 +790,7 @@
 /turf/simulated/floor/plasteel,
 /area/ruin/onehalf/bridge)
 "bR" = (
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bS" = (
@@ -810,12 +807,12 @@
 "bV" = (
 /obj/structure/disposalpipe/segment,
 /obj/item/stack/rods,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bW" = (
 /obj/structure/girder/reinforced,
-/turf/unsimulated/floor/plating/airless,
+/turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "bX" = (
 /turf/simulated/wall/r_wall,
@@ -830,12 +827,12 @@
 	dir = 1
 	},
 /obj/item/shard,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "ca" = (
 /obj/structure/disposalpipe/segment,
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plasteel/airless,
 /area/ruin/onehalf/hallway)
 "cb" = (
@@ -897,15 +894,15 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "ck" = (
 /obj/structure/girder/reinforced,
-/turf/unsimulated/floor/plating/airless,
+/turf/simulated/floor/plating,
 /area/space/nearstation)
 "cl" = (
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/space/nearstation)
 "cm" = (
@@ -1011,7 +1008,7 @@
 /turf/template_noop,
 /area/space/nearstation)
 "cw" = (
-/turf/unsimulated/floor/plating/airless,
+/turf/simulated/floor/plating,
 /area/space/nearstation)
 "cx" = (
 /obj/structure/lattice,
@@ -1033,7 +1030,7 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/landmark/damageturf,
+/obj/effect/landmark/tiles/damageturf,
 /turf/simulated/floor/plating,
 /area/ruin/onehalf/hallway)
 "cA" = (
@@ -1455,10 +1452,10 @@ aa
 aa
 aa
 aa
-aj
+bM
 ax
 aH
-aj
+bM
 aU
 bi
 bJ
@@ -1479,11 +1476,11 @@ aa
 ae
 ak
 ax
-aj
+bM
 ax
 be
 bu
-aj
+bM
 bU
 aa
 aa

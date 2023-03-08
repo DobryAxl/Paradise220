@@ -667,7 +667,8 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	blockTracking = 1
 	origin_tech = "materials=7;magnets=4;abductor=3"
 	flags = BLOCKHAIR
-	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE
+	flags_inv = HIDEMASK|HIDEHEADSETS|HIDEGLASSES|HIDENAME
+	flags_cover = HEADCOVERSMOUTH|HEADCOVERSEYES
 
 // Operating Table / Beds / Lockers
 
@@ -748,3 +749,112 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	airlock_type = /obj/machinery/door/airlock/abductor
 	material_type = /obj/item/stack/sheet/mineral/abductor
 	noglass = TRUE
+
+/obj/item/reagent_containers/applicator/abductor
+	name = "alien mender"
+	desc = "Hidden behind a high-tech look is a time-tested mechanism"
+	origin_tech = "materials=2;biotech=3;abductor=2"
+	icon_state = "alien_mender_empty"
+	item_state = "alien_mender"
+	icon = 'icons/obj/abductor.dmi'
+	emagged = TRUE
+	ignore_flags = TRUE
+	var/base_icon = "alien_mender_brute"
+
+/obj/item/reagent_containers/applicator/abductor/update_icon()
+	var/reag_pct = round((reagents.total_volume / volume) * 100)
+
+	switch(reag_pct)
+		if(51 to 100)
+			icon_state = "[base_icon]_full[applying ? "_active" : ""]"
+		if(1 to 50)
+			icon_state = "[base_icon][applying ? "_active" : ""]"
+		if(0)
+			icon_state = "alien_mender_empty"
+
+/obj/item/reagent_containers/applicator/abductor/brute
+	name = "alien brute mender"
+	base_icon = "alien_mender_brute"
+	list_reagents = list("styptic_powder" = 200)
+
+/obj/item/reagent_containers/applicator/abductor/burn
+	name = "alien burn mender"
+	base_icon = "alien_mender_burn"
+	list_reagents = list("silver_sulfadiazine" = 200)
+
+/obj/item/reagent_containers/glass/bottle/abductor
+	name = "alien bottle"
+	desc = "A durable bottle, made from alien alloy"
+	icon = 'icons/obj/abductor.dmi'
+	origin_tech = "materials=4"
+	icon_state = "alien_bottle"
+	item_state = "alien_bottle"
+	volume = 50
+
+/obj/item/reagent_containers/glass/bottle/abductor/rezadone
+	name = "rezadone bottle"
+	list_reagents = list("rezadone" = 50)
+
+/obj/item/reagent_containers/glass/bottle/abductor/epinephrine
+	name = "epinephrine bottle"
+	list_reagents = list("epinephrine" = 50)
+
+/obj/item/reagent_containers/glass/bottle/abductor/salgu
+	name = "saline-glucose solution bottle"
+	list_reagents = list("salglu_solution" = 50)
+
+/obj/item/reagent_containers/glass/bottle/abductor/oculine
+	name = "oculine bottle"
+	list_reagents = list("oculine" = 50)
+
+/obj/item/reagent_containers/glass/bottle/abductor/pen_acid
+	name = "pentetic acid bottle"
+	list_reagents = list("pen_acid" = 50)
+
+/obj/item/healthanalyzer/abductor
+	name = "alien health analyzer"
+	icon = 'icons/obj/abductor.dmi'
+	origin_tech = "materials=4;biotech=4;abductor=2"
+	advanced = TRUE
+	icon_state = "alien_hscanner"
+	item_state = "alien_hscanner"
+	desc = "Why its interface looks so familiar?"
+
+/obj/item/storage/firstaid_abductor
+	name = "alien medkit"
+	desc = "Kit that contains some advanced alien medicine. Keep it away from alien-kids"
+	icon = 'icons/obj/abductor.dmi'
+	icon_state = "alien_medkit"
+	item_state = "alien_medkit"
+	throw_speed = 2
+	throw_range = 8
+
+/obj/item/storage/firstaid_abductor/New()
+	..()
+	new /obj/item/reagent_containers/applicator/abductor/brute(src)
+	new /obj/item/reagent_containers/applicator/abductor/burn(src)
+	new /obj/item/reagent_containers/glass/bottle/abductor/rezadone(src)
+	new /obj/item/reagent_containers/glass/bottle/abductor/epinephrine(src)
+	new /obj/item/reagent_containers/glass/bottle/abductor/salgu(src)
+	new /obj/item/reagent_containers/glass/bottle/abductor/oculine(src)
+	new /obj/item/reagent_containers/glass/bottle/abductor/pen_acid(src)
+
+/obj/item/clothing/gloves/abductor_agent
+	desc = "These gloves seems to protect the wearer from electric shock."
+	name = "high-tech insulated gloves"
+	icon = 'icons/obj/abductor.dmi'
+	icon_state = "gloves_agent"
+	item_state = "abductor_gloves_agent"
+	siemens_coefficient = 0
+	permeability_coefficient = 0.05
+	resistance_flags = NONE
+
+/obj/item/clothing/gloves/abductor_science
+	name = "high-tech science gloves"
+	desc = "High-tech sterile gloves that are stronger than latex."
+	icon = 'icons/obj/abductor.dmi'
+	icon_state = "gloves_science"
+	item_state = "abductor_gloves_science"
+	siemens_coefficient = 0.30
+	permeability_coefficient = 0.01
+	resistance_flags = NONE

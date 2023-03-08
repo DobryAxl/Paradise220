@@ -449,12 +449,12 @@ won't update every console in existence) but it's more of a hassle to do. Also, 
 	var/enough_materials = TRUE
 
 	if(!machine.materials.has_materials(efficient_mats, amount))
-		atom_say("Not enough materials to complete prototype.")
+		atom_say("Недостаточно материалов для завершения прототипа.")
 		enough_materials = FALSE
 	else
 		for(var/R in being_built.reagents_list)
 			if(!machine.reagents.has_reagent(R, being_built.reagents_list[R]) * coeff)
-				atom_say("Not enough reagents to complete prototype.")
+				atom_say("Недостаточно реагентов для завершения прототипа.")
 				enough_materials = FALSE
 
 	if(enough_materials)
@@ -464,16 +464,25 @@ won't update every console in existence) but it's more of a hassle to do. Also, 
 
 	addtimer(CALLBACK(src, .proc/finish_machine, usr, amount, enough_materials, machine, being_built, coeff), time_to_construct)
 
+	for(var/obj/machinery/r_n_d/server/S in GLOB.machines)
+		if(S.disabled)
+			continue
+		if(syndicate != S.syndicate)
+			continue
+		if(istype(S, /obj/machinery/r_n_d/server/core) || istype(S, /obj/machinery/r_n_d/server/centcom))
+			S.add_usage_log(usr, being_built, machine)
+
 /obj/machinery/computer/rdconsole/proc/finish_machine(mob/user, amount, enough_materials, obj/machinery/r_n_d/machine, datum/design/being_built, coeff)
 	if(machine)
 		if(enough_materials && being_built)
 			investigate_log("[key_name_log(user)] built [amount] of [being_built.build_path] via [machine].", INVESTIGATE_RESEARCH)
 			for(var/i in 1 to amount)
-				var/obj/item/new_item = new being_built.build_path(src)
+				var/obj/new_item = new being_built.build_path(src)
 				if(istype(new_item, /obj/item/storage/backpack/holding))
 					new_item.investigate_log("built by [key_name_log(user)]", INVESTIGATE_ENGINE)
-				if(!istype(new_item, /obj/item/stack/sheet)) // To avoid materials dupe glitches
-					new_item.update_materials_coeff(coeff)
+				if(isitem(new_item) && !istype(new_item, /obj/item/stack/sheet)) // To avoid materials dupe glitches
+					var/obj/item/new_item_item = new_item
+					new_item_item.update_materials_coeff(coeff)
 				if(being_built.locked)
 					var/obj/item/storage/lockbox/research/L = new/obj/item/storage/lockbox/research(machine.loc)
 					new_item.forceMove(L)
@@ -712,6 +721,7 @@ won't update every console in existence) but it's more of a hassle to do. Also, 
 		return 1
 	if(!allowed(user) && !isobserver(user))
 		to_chat(user, "<span class='warning'>Access denied.</span>")
+		playsound(src, pick('sound/machines/button.ogg', 'sound/machines/button_alternate.ogg', 'sound/machines/button_meloboom.ogg'), 20)
 		return TRUE
 	ui_interact(user)
 

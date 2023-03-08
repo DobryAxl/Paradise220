@@ -4,8 +4,9 @@
 	icon_state = "capspace"
 	item_state = "capspacehelmet"
 	desc = "A special helmet designed for only the most fashionable of military figureheads."
-	flags_inv = HIDEFACE
+	flags_inv = HIDENAME
 	permeability_coefficient = 0.01
+	resistance_flags = ACID_PROOF
 	armor = list("melee" = 40, "bullet" = 50, "laser" = 50, "energy" = 40, "bomb" = 50, "bio" = 100, "rad" = 50, "fire" = 100, "acid" = 100)
 	species_restricted = list("exclude", "Wryn", "lesser form")
 
@@ -29,6 +30,7 @@
 	icon_state = "caparmor"
 	item_state = "capspacesuit"
 	w_class = WEIGHT_CLASS_BULKY
+	resistance_flags = ACID_PROOF
 	allowed = list(/obj/item/tank/internals, /obj/item/flashlight,/obj/item/gun/energy, /obj/item/gun/projectile, /obj/item/ammo_box, /obj/item/ammo_casing, /obj/item/melee/baton,/obj/item/restraints/handcuffs)
 	armor = list("melee" = 40, "bullet" = 50, "laser" = 50, "energy" = 40, "bomb" = 50, "bio" = 100, "rad" = 50, "fire" = 100, "acid" = 100)
 	flags_inv = HIDESHOES|HIDEJUMPSUIT|HIDETAIL
@@ -95,7 +97,9 @@
 	desc = "An armored beret commonly used by special operations officers."
 	icon_state = "beret_officer"
 	armor = list("melee" = 80, "bullet" = 80, "laser" = 50, "energy" = 100, "bomb" = 100, "bio" = 100, "rad" = 100, "fire" = 100, "acid" = 100)
+	flags_inv = 0
 	flags =  STOPSPRESSUREDMAGE | THICKMATERIAL
+	flags_cover = null
 
 /obj/item/clothing/head/helmet/space/deathsquad/beret/supreme
 	name = "Офицерская фуражка Верховного Главнокомандующего"
@@ -140,6 +144,10 @@
 	name = "\improper Trans-Solar Federation commander's jacket"
 	icon_state = "solgovcommander"
 	item_state = "solgovcommander"
+
+/obj/item/clothing/suit/space/deathsquad/officer/syndie
+	icon_state = "jacket_syndie"
+	item_state = "jacket_syndie"
 
 //Space santa outfit suit
 /obj/item/clothing/head/helmet/space/santahat
@@ -301,7 +309,7 @@
 	icon_state = "spacenew"
 	item_state = "s_helmet"
 	desc = "A lightweight space helmet with the basic ability to protect the wearer from the vacuum of space during emergencies."
-	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES
+	flags_inv = HIDEMASK|HIDEHEADSETS|HIDEGLASSES
 	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 100, rad = 20, fire = 50, acid = 65)
 	flash_protect = 0
 	species_restricted = list("exclude", "Wryn", "lesser form")

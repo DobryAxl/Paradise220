@@ -82,6 +82,10 @@
 				log_admin("[key_name(usr)] has spawned a space ninja.")
 				if(!makeSpaceNinja())
 					to_chat(usr, "<span class='warning'>Unfortunately there weren't enough candidates available.</span>")
+			if("11")
+				log_admin("[key_name(usr)] has spawned a thief.")
+				if(!makeThieves())
+					to_chat(usr, "<span class='warning'>Unfortunately there weren't enough candidates available.</span>")
 
 	else if(href_list["dbsearchckey"] || href_list["dbsearchadmin"] || href_list["dbsearchip"] || href_list["dbsearchcid"] || href_list["dbsearchbantype"])
 		var/adminckey = href_list["dbsearchadmin"]
@@ -384,9 +388,10 @@
 		if(!check_rights(R_SERVER))	return
 
 		var/timer = input("Enter new shuttle duration (seconds):","Edit Shuttle Timeleft", SSshuttle.emergency.timeLeft() ) as num
+		var/time_to_destination = round(SSshuttle.emergency.timeLeft(600))
 		SSshuttle.emergency.setTimer(timer*10)
 		log_admin("[key_name(usr)] edited the Emergency Shuttle's timeleft to [timer] seconds")
-		GLOB.minor_announcement.Announce("The emergency shuttle will reach its destination in [round(SSshuttle.emergency.timeLeft(600))] minutes.")
+		GLOB.minor_announcement.Announce("Эвакуационный шаттл достигнет места назначения через [time_to_destination] [declension_ru(time_to_destination,"минуту","минуты","минут")].")
 		message_admins("<span class='adminnotice'>[key_name_admin(usr)] edited the Emergency Shuttle's timeleft to [timer] seconds</span>")
 		href_list["secrets"] = "check_antagonist"
 
@@ -1452,6 +1457,18 @@
 			to_chat(usr, "<span class='warning'>This can only be used on instances of type /human</span>")
 			return
 		usr.client.cmd_admin_dress(M)
+	else if(href_list["change_voice"])
+		if(!check_rights(R_ADMIN))
+			return
+
+		var/mob/M = locateUID(href_list["change_voice"])
+		if(!isliving(M))
+			to_chat(usr, "<span class='warning'>This can only be used on instances of type /living</span>")
+			return
+		var/old_tts_seed = M.tts_seed
+		var/new_tts_seed = M.change_voice(usr)
+		to_chat(M, "<span class='notice'>Your voice has been changed from [old_tts_seed] to [new_tts_seed].</span>")
+		log_and_message_admins("has changed [key_name_admin(M)]'s voice from [old_tts_seed] to [new_tts_seed]")
 
 	else if(href_list["update_mob_sprite"])
 		if(!check_rights(R_ADMIN))
@@ -2826,11 +2843,11 @@
 				if(GLOB.gravity_is_on)
 					log_admin("[key_name(usr)] toggled gravity on.")
 					message_admins("<span class='notice'>[key_name_admin(usr)] toggled gravity on.</span>")
-					GLOB.event_announcement.Announce("Gravity generators are again functioning within normal parameters. Sorry for any inconvenience.")
+					GLOB.event_announcement.Announce("Гравитационные генераторы снова функционируют в пределах штатных значений. Приносим извинения за неудобства.")
 				else
 					log_admin("[key_name(usr)] toggled gravity off.")
 					message_admins("<span class='notice'>[key_name_admin(usr)] toggled gravity off.</span>")
-					GLOB.event_announcement.Announce("Feedback surge detected in mass-distributions systems. Artifical gravity has been disabled whilst the system reinitializes. Further failures may result in a gravitational collapse and formation of blackholes. Have a nice day.")
+					GLOB.event_announcement.Announce("Обнаружен всплеск обратной связи в системах распределения масс. Искусственная гравитация была отключена на время восстановления системы. Дальнейшие сбои могут привести к гравитационному коллапсу и образованию чёрных дыр. Хорошего дня.")
 
 			if("power")
 				SSblackbox.record_feedback("tally", "admin_secrets_fun_used", 1, "Power All APCs")
@@ -3022,7 +3039,7 @@
 					if(is_station_level(W.z) && !istype(get_area(W), /area/bridge) && !istype(get_area(W), /area/crew_quarters) && !istype(get_area(W), /area/security/prison))
 						W.req_access = list()
 				message_admins("[key_name_admin(usr)] activated Egalitarian Station mode")
-				GLOB.event_announcement.Announce("Centcomm airlock control override activated. Please take this time to get acquainted with your coworkers.", new_sound = 'sound/AI/commandreport.ogg')
+				GLOB.event_announcement.Announce("Активирована блокировка управления шл+юзами. Пожалуйста, воспользуйтесь этим временем, чтобы познакомиться со своими коллегами.", new_sound = 'sound/AI/commandreport.ogg')
 			if("onlyone")
 				SSblackbox.record_feedback("tally", "admin_secrets_fun_used", 1, "Only One")
 				usr.client.only_one()
@@ -3118,12 +3135,21 @@
 				template.copy_contents_to(ertarmory)
 				log_admin("[key_name(usr)] reset the ertarmory to default with delete_mobs==[delete_mobs].", 1)
 				message_admins("<span class='adminnotice'>[key_name_admin(usr)] reset ertarmory to default with delete_mobs==[delete_mobs].</span>")
+			*/
 			if("tdomereset")
 				var/delete_mobs = alert("Clear all mobs?","Confirm","Yes","No","Cancel")
 				if(delete_mobs == "Cancel")
 					return
 				var/area/thunderdome = locate(/area/tdome/arena)
+				var/area/team1 = locate(/area/tdome/tdome1)
+				var/area/team2 = locate(/area/tdome/tdome2)
 				if(delete_mobs == "Yes")
+					var/clear_team_spawns = alert("Clear mobs on thunderdome spawns too?","Confirm","Yes","No")
+					if(clear_team_spawns == "Yes")
+						for(var/mob/living/mob in team1)
+							qdel(mob) //Clear mobs
+						for(var/mob/living/mob in team2)
+							qdel(mob) //Clear mobs
 					for(var/mob/living/mob in thunderdome)
 						qdel(mob) //Clear mobs
 				for(var/obj/obj in thunderdome)
@@ -3132,7 +3158,7 @@
 				var/area/template = locate(/area/tdome/arena_source)
 				template.copy_contents_to(thunderdome)
 				log_admin("[key_name(usr)] reset the thunderdome to default with delete_mobs==[delete_mobs].", 1)
-				message_admins("<span class='adminnotice'>[key_name_admin(usr)] reset the thunderdome to default with delete_mobs==[delete_mobs].</span>") */
+				message_admins("<span class='adminnotice'>[key_name_admin(usr)] reset the thunderdome to default with delete_mobs==[delete_mobs].</span>")
 
 			if("tdomestart")
 				var/confirmation = alert("Start a Thunderdome match?","Confirm","Yes","No")
@@ -3238,11 +3264,11 @@
 				to_chat(usr, "<b>Code Responses:</b> <span class='coderesponses'>[GLOB.syndicate_code_response]</span>")
 			if("DNA")
 				var/dat = {"<meta charset="UTF-8"><b>Showing DNA from blood.</b><hr>"}
-				dat += "<table cellspacing=5><tr><th>Name</th><th>DNA</th><th>Blood Type</th></tr>"
+				dat += "<table cellspacing=5><tr><th>Name</th><th>DNA</th><th>Blood Type</th><th>Race Blood Type</th></tr>"
 				for(var/thing in GLOB.human_list)
 					var/mob/living/carbon/human/H = thing
 					if(H.dna && H.ckey)
-						dat += "<tr><td>[H]</td><td>[H.dna.unique_enzymes]</td><td>[H.dna.blood_type]</td></tr>"
+						dat += "<tr><td>[H]</td><td>[H.dna.unique_enzymes]</td><td>[H.dna.blood_type]</td><td>[H.dna.species.blood_species]</td></tr>"
 				dat += "</table>"
 				usr << browse(dat, "window=DNA;size=440x410")
 			if("fingerprints")
@@ -3310,7 +3336,11 @@
 				if(!J) return
 				J.total_positions = -1
 				J.spawn_positions = -1
-				message_admins("[key_name_admin(usr)] has removed the cap on security officers.")
+				J = SSjobs.GetJob("Security Cadet")
+				if(!J) return
+				J.total_positions = -1
+				J.spawn_positions = -1
+				message_admins("[key_name_admin(usr)] has removed the cap on security officers and cadets.")
 
 	if(href_list["secretsmenu"])
 		switch(href_list["secretsmenu"])

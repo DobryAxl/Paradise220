@@ -23,6 +23,7 @@
 	speak_emote = list("chirrups")
 	emote_hear = list("chirrups")
 	emote_see = list("chirrups")
+	tts_seed = "Priest"
 
 	response_help  = "pets"
 	response_disarm = "pushes"
@@ -95,8 +96,7 @@
 	else
 		..()
 
-/mob/living/simple_animal/diona/resist()
-	..()
+/mob/living/simple_animal/diona/run_resist()
 	split()
 
 /mob/living/simple_animal/diona/attack_hand(mob/living/carbon/human/M)

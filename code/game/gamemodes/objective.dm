@@ -1,7 +1,5 @@
 GLOBAL_LIST_EMPTY(all_objectives)
 
-GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective) - /datum/theft_objective/steal - /datum/theft_objective/number - /datum/theft_objective/unique))
-
 /datum/objective
 	var/datum/mind/owner = null			//Who owns the objective.
 	var/explanation_text = "Nothing"	//What that person is supposed to do.
@@ -26,13 +24,14 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 /datum/objective/proc/is_invalid_target(datum/mind/possible_target)
 	if(possible_target == owner)
 		return TARGET_INVALID_IS_OWNER
-	if(possible_target in owner.targets)
-		return TARGET_INVALID_IS_TARGET
+	for(var/datum/objective/objective in owner.objectives)
+		if(istype(objective) && objective.target == possible_target)
+			return TARGET_INVALID_IS_TARGET
 	if(!ishuman(possible_target.current))
 		return TARGET_INVALID_NOT_HUMAN
 	if(possible_target.current.stat == DEAD)
 		return TARGET_INVALID_DEAD
-	if(!possible_target.key)
+	if(!possible_target.key || !possible_target.current.ckey)
 		return TARGET_INVALID_NOCKEY
 	if(possible_target.current)
 		var/turf/current_location = get_turf(possible_target.current)
@@ -64,6 +63,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	if(owner?.current)
 		to_chat(owner.current, "<BR><span class='userdanger'>You get the feeling your target is no longer within reach. Time for Plan [pick("A","B","C","D","X","Y","Z")]. Objectives updated!</span>")
 		SEND_SOUND(owner.current, 'sound/ambience/alarm4.ogg')
+	SSticker.mode.victims.Remove(target)
 	target = null
 	INVOKE_ASYNC(src, .proc/post_target_cryo)
 
@@ -85,6 +85,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	..()
 	if(target && target.current)
 		explanation_text = "Assassinate [target.current.real_name], the [target.assigned_role]."
+		if (!(target in SSticker.mode.victims))
+			SSticker.mode.victims.Add(target)
 	else
 		explanation_text = "Free Objective"
 	return target
@@ -99,6 +101,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 			return 1
 		return 0
 	return 1
+
 
 
 /datum/objective/mutiny
@@ -133,6 +136,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	// them win or lose based on cryo is silly so we remove the objective.
 	qdel(src)
 
+
 /datum/objective/maroon
 	martyr_compatible = 1
 
@@ -140,6 +144,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	..()
 	if(target && target.current)
 		explanation_text = "Prevent from escaping alive or assassinate [target.current.real_name], the [target.assigned_role]."
+		if (!(target in SSticker.mode.victims))
+			SSticker.mode.victims.Add(target)
 	else
 		explanation_text = "Free Objective"
 	return target
@@ -153,6 +159,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 		if(issilicon(target.current))
 			return 1
 		if(isbrain(target.current))
+			return 1
+		if(isalien(target.current))
 			return 1
 		var/turf/T = get_turf(target.current)
 		if(is_admin_level(T.z))
@@ -168,6 +176,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	..()
 	if(target && target.current)
 		explanation_text = "Steal the brain of [target.current.real_name] the [target.assigned_role]."
+		if (!(target in SSticker.mode.victims))
+			SSticker.mode.victims.Add(target)
 	else
 		explanation_text = "Free Objective"
 	return target
@@ -192,7 +202,16 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	martyr_compatible = 1
 
 /datum/objective/protect/find_target()
-	..()
+	var/list/datum/mind/temp_victims = SSticker.mode.victims.Copy()
+	for(var/datum/objective/objective in owner.objectives)
+		temp_victims.Remove(objective.target)
+	temp_victims.Remove(owner)
+
+	if (length(temp_victims))
+		target = pick(temp_victims)
+	else
+		..()
+
 	if(target && target.current)
 		explanation_text = "Protect [target.current.real_name], the [target.assigned_role]."
 	else
@@ -201,16 +220,16 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 
 /datum/objective/protect/check_completion()
 	if(!target) //If it's a free objective.
-		return 1
+		return TRUE
 	if(target.current)
 		if(target.current.stat == DEAD)
-			return 0
-		if(issilicon(target.current))
-			return 0
+			return FALSE
 		if(isbrain(target.current))
-			return 0
-		return 1
-	return 0
+			return FALSE
+		if(!iscarbon(target.current))
+			return FALSE
+		return TRUE
+	return FALSE
 
 /datum/objective/protect/mindslave //subtype for mindslave implants
 
@@ -252,7 +271,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 				if(issilicon(player))
 					continue
 				if(get_area(player) == A)
-					if(player.real_name != owner.current.real_name && !istype(get_turf(player.mind.current), /turf/simulated/shuttle/floor4))
+					if(player.real_name != owner.current.real_name && !istype(get_turf(player.mind.current), /turf/simulated/floor/shuttle/objective_check))
 						return 0
 
 	for(var/mob/living/player in GLOB.player_list) //Make sure at least one of you is onboard
@@ -261,7 +280,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 				if(issilicon(player))
 					continue
 				if(get_area(player) == A)
-					if(player.real_name == owner.current.real_name && !istype(get_turf(player.mind.current), /turf/simulated/shuttle/floor4))
+					if(player.real_name == owner.current.real_name && !istype(get_turf(player.mind.current), /turf/simulated/floor/shuttle/objective_check))
 						return 1
 	return 0
 
@@ -272,6 +291,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 /datum/objective/block/check_completion()
 	if(!istype(owner.current, /mob/living/silicon))
 		return 0
+	if(SSticker.mode.station_was_nuked)
+		return TRUE
 	if(SSshuttle.emergency.mode < SHUTTLE_ENDGAME)
 		return 0
 	if(!owner.current)
@@ -309,7 +330,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	if(!location)
 		return 0
 
-	if(istype(location, /turf/simulated/shuttle/floor4) || istype(location, /turf/simulated/floor/mineral/plastitanium/red/brig)) // Fails traitors if they are in the shuttle brig -- Polymorph
+	if(istype(location, /turf/simulated/floor/shuttle/objective_check) || istype(location, /turf/simulated/floor/mineral/plastitanium/red/brig)) // Fails traitors if they are in the shuttle brig -- Polymorph
 		return 0
 
 	if(location.onCentcom() || location.onSyndieBase())
@@ -332,6 +353,8 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 		target = pick(possible_targets)
 	if(target && target.current)
 		target_real_name = target.current.real_name
+		if (!(target in SSticker.mode.victims))
+			SSticker.mode.victims.Add(target)
 		explanation_text = "Escape on the shuttle or an escape pod with the identity of [target_real_name], the [target.assigned_role] while wearing [target.p_their()] identification card."
 	else
 		explanation_text = "Free Objective"
@@ -378,6 +401,10 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	var/datum/theft_objective/steal_target
 	martyr_compatible = 0
 	var/theft_area
+	var/type_theft_flag = 0
+
+/datum/objective/steal/proc/get_theft_extension_list_objectives()
+	return FALSE
 
 /datum/objective/steal/proc/get_location()
 	if(steal_target.location_override)
@@ -387,52 +414,58 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 		if(!is_admin_level(candidate.loc.z))
 			theft_area = get_area(candidate.loc)
 			return "[theft_area]"
-	return "an unknown area"
+	return "неизвестной зоне"
 
 /datum/objective/steal/find_target()
-	var/loop=50
-	while(!steal_target && loop > 0)
-		loop--
-		var/thefttype = pick(GLOB.potential_theft_objectives)
+	var/list/valid_theft_objectives = list()
+	for(var/thefttype in get_theft_list_objectives(type_theft_flag))
+		for(var/datum/objective/steal/objective in owner.objectives)
+			if(istype(objective) && istype(objective.steal_target, thefttype))
+				continue
 		var/datum/theft_objective/O = new thefttype
 		if(owner.assigned_role in O.protected_jobs)
 			continue
-		if(O in owner.targets)
-			continue
-		if(O.flags & 2)
-			continue
+		valid_theft_objectives += O
+	if(length(valid_theft_objectives))
+		var/datum/theft_objective/O = pick(valid_theft_objectives)
 		steal_target = O
 
-		explanation_text = "Steal [steal_target]. One was last seen in [get_location()]. "
+		explanation_text = "Украсть [steal_target]. Последнее местоположение было в [get_location()]. "
 		if(islist(O.protected_jobs) && O.protected_jobs.len)
-			explanation_text += "It may also be in the possession of the [jointext(O.protected_jobs, ", ")]."
-		return
-	explanation_text = "Free Objective."
+			explanation_text += "Оно также может находиться у [jointext(O.protected_jobs, ", ")]."
+		return TRUE
 
+	explanation_text = "Free Objective."
+	return FALSE
 
 /datum/objective/steal/proc/select_target()
-	var/list/possible_items_all = GLOB.potential_theft_objectives+"custom"
+	var/list/possible_items_all = get_theft_list_objectives(type_theft_flag)+"custom"
 	var/new_target = input("Select target:", "Objective target", null) as null|anything in possible_items_all
-	if(!new_target) return
+	if(!new_target)
+		return FALSE
 	if(new_target == "custom")
 		var/datum/theft_objective/O=new
 		O.typepath = input("Select type:","Type") as null|anything in typesof(/obj/item)
-		if(!O.typepath) return
+		if(!O.typepath)
+			return FALSE
 		var/tmp_obj = new O.typepath
 		var/custom_name = tmp_obj:name
 		qdel(tmp_obj)
 		O.name = sanitize(copytext_char(input("Enter target name:", "Objective target", custom_name) as text|null,1,MAX_NAME_LEN))
-		if(!O.name) return
+		if(!O.name)
+			return FALSE
 		steal_target = O
-		explanation_text = "Steal [O.name]."
+		explanation_text = "Украсть [O.name]."
 	else
 		steal_target = new new_target
-		explanation_text = "Steal [steal_target.name]."
-	return steal_target
+		explanation_text = "Украсть [steal_target.name]."
+	if(steal_target)
+		return TRUE
+	return FALSE
 
 /datum/objective/steal/check_completion()
 	if(!steal_target)
-		return 1 // Free Objective
+		return TRUE // Free Objective
 
 	if(!owner.current)
 		return FALSE
@@ -621,7 +654,7 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 
 /datum/objective/heist/kidnap
 /datum/objective/heist/kidnap/choose_target()
-	var/list/roles = list("Chief Engineer","Research Director","Roboticist","Chemist","Station Engineer")
+	var/list/roles = list("Chief Engineer","Research Director","Chief Medical Officer","Head of Personal","Head of Security","Nanotrasen Representative","Magistrate","Roboticist","Chemist")
 	var/list/possible_targets = list()
 	var/list/priority_targets = list()
 
@@ -734,29 +767,23 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 
 /datum/objective/heist/salvage
 /datum/objective/heist/salvage/choose_target()
-	switch(rand(1,8))
+	switch(rand(1,6))
 		if(1)
-			target = "metal"
-			target_amount = 300
-		if(2)
-			target = "glass"
-			target_amount = 200
-		if(3)
 			target = "plasteel"
 			target_amount = 100
-		if(4)
+		if(2)
 			target = "solid plasma"
 			target_amount = 100
-		if(5)
+		if(3)
 			target = "silver"
 			target_amount = 50
-		if(6)
+		if(4)
 			target = "gold"
 			target_amount = 20
-		if(7)
+		if(5)
 			target = "uranium"
 			target_amount = 20
-		if(8)
+		if(6)
 			target = "diamond"
 			target_amount = 20
 
@@ -868,6 +895,21 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 /datum/objective/get_money
 	var/req_amount = 75000
 
+/datum/objective/get_money/proc/new_cash(var/input_sum, var/accounts_procent = 60)
+	var/temp_cash_summ = 0
+	var/remainder = 0
+
+	if(input_sum)
+		temp_cash_summ = input_sum
+	else
+		for(var/datum/money_account/account in GLOB.all_money_accounts)
+			temp_cash_summ += account.money
+		temp_cash_summ = (temp_cash_summ / 100) * accounts_procent //procents from all accounts
+		remainder = temp_cash_summ % 1000	//для красивого 1000-го числа
+
+	req_amount = temp_cash_summ - remainder
+	explanation_text = "Добудьте [req_amount] кредитов со станции, наличкой."
+
 /datum/objective/get_money/check_completion()
 	if(!owner.current)
 		return FALSE
@@ -890,14 +932,12 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 /datum/objective/protect/ninja/Destroy()
 	if(killers_objectives)
 		for(var/datum/objective/killer_objective in killers_objectives)
-			log_debug("Ninja_Objectives_Log: Удаляем цели на защищаемого у убийц.")
 			GLOB.all_objectives -= killer_objective
 			killer_objective.owner?.objectives -= killer_objective
 			qdel(killer_objective)
 	. = ..()
 
 /datum/objective/protect/ninja/find_target()
-	log_debug("Ninja_Objectives_Log: Начата генерация потенциальных целей на защиту.")
 	var/list/possible_targets = list()
 	for(var/datum/mind/possible_target in SSticker.minds)
 		if(is_invalid_target(possible_target))
@@ -906,23 +946,78 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 		if(killers_objectives.len)
 			for(var/datum/objective/killer_objective in killers_objectives)
 				possible_targets -= killer_objective.owner
-				log_debug("Ninja_Objectives_Log: Из потенциальных целей убран [killer_objective.owner]")
 
 	if(possible_targets.len > 0)
 		if(target)
 			if(target in possible_targets)
 				possible_targets -= target
-				log_debug("Ninja_Objectives_Log: Из потенциальных целей убран [target]")
 
 		target = pick(possible_targets)
 	if(target && target.current)
-		log_debug("Ninja_Objectives_Log: Целью выбран: [target]")
 		explanation_text = "На [target.current.real_name], \
 		[target.assigned_role == target.special_role ? (target.special_role) : (target.assigned_role)] ведут охоту. \
 		[target.current.real_name] должен любой ценой дожить до конца смены и ваша работа как можно незаметнее позаботится о том, чтобы он остался жив."
+		generate_traitors()
 	else
 		explanation_text = "Free Objective"
 	return target
+
+/datum/objective/protect/ninja/proc/generate_traitors()
+//Генерация трейторов для атаки защищаемого
+	var/list/possible_traitors = list()
+	for(var/mob/living/player in GLOB.alive_mob_list)
+		if(player.client && player.mind && player.stat != DEAD && player != target.current)
+			if((ishuman(player) && !player.mind.special_role) || (isAI(player) && !player.mind.special_role))
+				if(player.client && (ROLE_TRAITOR in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_TRAITOR) && !jobban_isbanned(player, "Syndicate"))
+					possible_traitors += player.mind
+	for(var/datum/mind/player in possible_traitors)
+		if(player.current)
+			if(ismindshielded(player.current))
+				possible_traitors -= player
+	if(possible_traitors.len)
+		var/traitor_num = max(1, round((SSticker.mode.num_players_started())/(config.traitor_scaling))+1)
+		for(var/j = 0, j < traitor_num, j++)
+			var/datum/mind/newtraitormind = pick(possible_traitors)
+			var/datum/antagonist/traitor/killer = new()
+			killer.silent = TRUE //Позже поздороваемся
+			newtraitormind.add_antag_datum(killer)
+			//Подменяем цель на того кого нам выпало защищать
+			var/datum/objective/maroon/killer_maroon_objective = locate() in newtraitormind.objectives
+			var/datum/objective/assassinate/killer_kill_objective = locate() in newtraitormind.objectives
+			if(killer_maroon_objective)
+				killer_maroon_objective.target = target
+				killer_maroon_objective.check_cryo = FALSE
+				killer_maroon_objective.explanation_text = "Prevent from escaping alive or assassinate [target.current.real_name], the [target.assigned_role]."
+				killers_objectives += killer_maroon_objective
+			else if(killer_kill_objective)
+				killer_kill_objective.target = target
+				killer_kill_objective.check_cryo = FALSE
+				killer_kill_objective.explanation_text = "Assassinate [target.current.real_name], the [target.assigned_role]."
+				killers_objectives += killer_kill_objective
+			else //Не нашли целей на убийство? Значит подставляем пресет из трёх целей вместо того, что нагенерил стандартный код. Прости хиджакер, не при ниндзя.
+				QDEL_LIST(newtraitormind.objectives)	// Очищаем листы
+				QDEL_LIST(killer.assigned_targets)
+				//Подставная цель для трейтора
+				var/datum/objective/maroon/maroon_objective = new
+				maroon_objective.owner = newtraitormind
+				maroon_objective.target = target
+				maroon_objective.check_cryo = FALSE
+				killer.assigned_targets.Add("[maroon_objective.target]")
+				maroon_objective.explanation_text = "Prevent from escaping alive or assassinate [target.current.real_name], the [target.assigned_role]."
+				killer.add_objective(maroon_objective)
+				killers_objectives += maroon_objective
+				//Кража для трейтора
+				var/datum/objective/steal/steal_objective = new
+				steal_objective.owner = newtraitormind
+				steal_objective.find_target()
+				killer.assigned_targets.Add("[steal_objective.steal_target]")
+				killer.add_objective(steal_objective)
+				//Ну и банальное - Выживи
+				var/datum/objective/survive/survive_objective = new
+				survive_objective.owner = newtraitormind
+				killer.add_objective(survive_objective)
+			killer.greet()	// Вот теперь здороваемся!
+			killer.update_traitor_icons_added()	// Фикс худа, а то порой те кому выпал хиджак при ниндзя - получали замену целек, но не худа
 
 /datum/objective/protect/ninja/on_target_cryo()
 	if(!check_cryo)
@@ -930,14 +1025,11 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	if(owner?.current)
 		to_chat(owner.current, "<BR><span class='userdanger'>You get the feeling your target is no longer within reach. Time for Plan [pick("A","B","C","D","X","Y","Z")]. Objectives updated!</span>")
 		SEND_SOUND(owner.current, 'sound/ambience/alarm4.ogg')
-//	target = null
-	log_debug("Ninja_Objectives_Log: Цель для защиты ушла в крио.")
 	INVOKE_ASYNC(src, .proc/post_target_cryo)
 
 /datum/objective/protect/ninja/post_target_cryo()
 	find_target()
 	if(!target)
-		log_debug("Ninja_Objectives_Log: Персонаж для защиты не найден! Удаляем цель")
 		GLOB.all_objectives -= src
 		owner?.objectives -= src
 		qdel(src)
@@ -954,11 +1046,10 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 			else if(istype(killer_objective, /datum/objective/maroon))
 				killer_objective.explanation_text = "Prevent from escaping alive or assassinate [killer_objective.target.current.real_name], the [killer_objective.target.assigned_role]."
 			killer_objective.owner?.announce_objectives()
-			log_debug("Ninja_Objectives_Log: Произведена замена цели на [killer_objective.target] для [killer_objective.owner]")
 
 //Цель на то чтобы подставить человека заставив сб его арестовать
 /datum/objective/set_up
-	martyr_compatible = 1
+	martyr_compatible = TRUE
 
 /datum/objective/set_up/find_target()
 	var/list/possible_targets = list()
@@ -993,39 +1084,33 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 
 /datum/objective/set_up/check_completion()
 	if(issilicon(target.current))
-		log_debug("Ninja_Objectives_Log: Цель на подставу. Цель боргизирована. Провал")
 		return 0
 	if(isbrain(target.current))
-		log_debug("Ninja_Objectives_Log: Цель на подставу. Цель - мозг. Провал")
 		return 0
 	if(!target.current || target.current.stat == DEAD)
-		log_debug("Ninja_Objectives_Log: Цель на подставу. Цель - труп. Провал")
 		return 0
 	// Проверка по наличию криминального статуса в консоли
 	var/datum/data/record/target_record = find_security_record("name", target.name)
 	if(target_record)
 		if(target_record.fields["criminal"] == SEC_RECORD_STATUS_INCARCERATED || target_record.fields["criminal"] == SEC_RECORD_STATUS_EXECUTE || target_record.fields["criminal"] == SEC_RECORD_STATUS_PAROLLED || target_record.fields["criminal"] == SEC_RECORD_STATUS_RELEASED)
-			log_debug("Ninja_Objectives_Log: Цель на подставу. Цель - имеет подходящий охранный статус. Успех")
 			return 1
 	// Находится ли цель в карцере/камере/перме в конце раунда
 	if(istype(target.current.lastarea, /area/security/prison/cell_block) || istype(target.current.lastarea, /area/security/permabrig) || istype(target.current.lastarea, /area/security/processing))
-		log_debug("Ninja_Objectives_Log: Цель на подставу. Цель - за решёткой. Успех")
 		return 1
 	// Зона СБ на шатле эвакуации
 	var/turf/location = get_turf(target.current)
 	if(!location)
 		return 0
-	if(istype(location, /turf/simulated/shuttle/floor4) || istype(location, /turf/simulated/floor/mineral/plastitanium/red/brig))
-		log_debug("Ninja_Objectives_Log: Цель на подставу. Цель - в зоне СБ на шаттле. Успех")
+	if(istype(location, /turf/simulated/floor/shuttle/objective_check) || istype(location, /turf/simulated/floor/mineral/plastitanium/red/brig))
 		return 1
 
 	return 0
 
 // Цель на то, чтобы найти обладающего информацией человека. Всё что известно ниндзя - его предполагаемая профессия.
 // Для выполнения этой цели - ниндзя должен похищать людей определённой профессии пока не найдёт ТОГО САМОГО засранца обладающего инфой.
-// Либо пока не похитит достаточно людей (от 3 до 8(на 100 игроков))
+// Либо пока не похитит достаточно людей (от 3 до 6(на 100 игроков))
 /datum/objective/find_and_scan
-	martyr_compatible = 1
+	martyr_compatible = TRUE
 	var/list/possible_roles = list()
 	// Переменные ниже наполняются устройством для сканирования
 	var/list/scanned_occupants = list()
@@ -1036,18 +1121,19 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	return
 
 /datum/objective/find_and_scan/find_target()
-	var/list/roles = list("Clown", "Mime", "Cargo Technician", "Shaft Miner", "Scientist", "Roboticist", "Medical Doctor", "Geneticist", "Security Officer", "Chemist", "Station Engineer", "Civilian")
+	var/list/roles = list("Clown", "Mime", "Cargo Technician",
+	"Shaft Miner", "Scientist", "Roboticist",
+	"Medical Doctor", "Geneticist", "Security Officer",
+	"Chemist", "Station Engineer", "Civilian",
+	"Botanist", "Chemist", "Virologist",
+	"Life Support Specialist")
 	var/list/possible_targets = list()
 	var/list/priority_targets = list()
-	log_debug("Ninja_Objectives_Log: Генерация цели на Похищения")
-	log_debug("Ninja_Objectives_Log: Выборка ролей.")
 	if(!possible_roles.len)
 		for(var/i in 1 to 3)
 			var/role = pick(roles)
-			log_debug("Ninja_Objectives_Log: [role].")
 			possible_roles += role
 			roles -= role
-	log_debug("Ninja_Objectives_Log: Выборка окончена.")
 	for(var/datum/mind/possible_target in SSticker.minds)
 		if(possible_target != owner && ishuman(possible_target.current) && (possible_target.current.stat != DEAD) && (possible_target.assigned_role != possible_target.special_role) && !possible_target.offstation_role)
 			possible_targets += possible_target
@@ -1057,23 +1143,87 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 					continue
 
 	if(priority_targets.len > 0)
-		log_debug("Ninja_Objectives_Log: Выбираем цель из приоритетного списка целей")
 		target = pick(priority_targets)
 	else if(possible_targets.len > 0)
-		log_debug("Ninja_Objectives_Log: Выбираем цель из обычного списка целей")
 		target = pick(possible_targets)
 
 	if(target)
-		log_debug("Ninja_Objectives_Log: Выбранная цель: [target]")
 		if(!(target.assigned_role in possible_roles))
-			log_debug("Ninja_Objectives_Log: Подмена одной из ролей под роль цели!")
 			possible_roles[pick(1,2,3)] = target.assigned_role
-
+	scans_to_win = clamp(round(possible_targets.len/10),initial(scans_to_win), 6)
 	//Даже если мы не нашли цель. Эту задачу всё ещё можно будет выполнить похитив достаточно разных человек с ролями
 	explanation_text = "Найдите обладающего важной информацией человека среди следующих профессий: [possible_roles[1]], [possible_roles[2]], [possible_roles[3]]. \
 		Для проверки и анализа памяти человека, вам придётся похитить его и просканировать в специальном устройстве на вашей базе."
 
 	return target
+
+/datum/objective/vermit_hunt
+	martyr_compatible = TRUE
+	var/req_kills
+
+/datum/objective/vermit_hunt/find_target()
+	generate_changelings()
+	req_kills = max(1, round(length(SSticker.mode.changelings)/2))
+	explanation_text = "На объекте вашей миссии действуют паразиты так же известные как \"Генокрады\" истребите хотя бы [req_kills] из них."
+
+/datum/objective/vermit_hunt/proc/generate_changelings()
+	var/list/possible_changelings = list()
+	var/datum/game_mode/changeling/temp_gameMode = new
+	for(var/mob/living/player in GLOB.alive_mob_list)
+		if(player.client && player.mind && player.stat != DEAD)
+			if((ishuman(player) && !player.mind.special_role))
+				if(player.client && (ROLE_CHANGELING in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_CHANGELING))
+					possible_changelings += player.mind
+	for(var/datum/mind/player in possible_changelings)
+		if(player.current)
+			if(ismindshielded(player.current))
+				possible_changelings -= player
+			if(player.current.dna.species.name in temp_gameMode.protected_species)
+				possible_changelings -= player
+	if(possible_changelings.len)
+		var/changeling_num = max(1, round((SSticker.mode.num_players_started())/(config.traitor_scaling))+1)
+		for(var/j = 0, j < changeling_num, j++)
+			var/datum/mind/new_changeling_mind = pick(possible_changelings)
+			new_changeling_mind.make_Changeling()
+			possible_changelings.Remove(new_changeling_mind)
+
+/datum/objective/vermit_hunt/check_completion()
+	var/killed_vermits = 0
+	for(var/datum/mind/player in SSticker.mode.changelings)
+		if(!player || !player.current || !player.current.ckey || player.current.stat == DEAD || issilicon(player.current) || isbrain(player.current))
+			killed_vermits += 1
+	if(killed_vermits >= req_kills)
+		return TRUE
+	return FALSE
+
+/datum/objective/collect_blood
+	martyr_compatible = TRUE
+	explanation_text = "На объекте вашей миссии действуют вампиры. \
+	Ваша задача отыскать их, взять с них образцы крови и просканировать оные в устройстве на вашей базе. \
+	Вам нужно 3 уникальных образца чтобы начать сканирование.\
+	Успешное сканирование поможет клану лучше противодействовать им."
+	var/samples_to_win = 3
+
+/datum/objective/collect_blood/proc/generate_vampires()
+	var/list/possible_vampires = list()
+	var/datum/game_mode/vampire/temp_gameMode = new
+	for(var/mob/living/player in GLOB.alive_mob_list)
+		if(player.client && player.mind && player.stat != DEAD)
+			if((ishuman(player) && !player.mind.special_role))
+				if(player.client && (ROLE_VAMPIRE in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_VAMPIRE))
+					possible_vampires += player.mind
+	for(var/datum/mind/player in possible_vampires)
+		if(player.current)
+			if(ismindshielded(player.current))
+				possible_vampires -= player
+			if(player.current.dna.species.name in temp_gameMode.protected_species)
+				possible_vampires -= player
+	if(possible_vampires.len)
+		var/vampires_num = max(1, round((SSticker.mode.num_players_started())/(config.traitor_scaling))+1)
+		for(var/j = 0, j < vampires_num, j++)
+			var/datum/mind/new_vampires_mind = pick(possible_vampires)
+			new_vampires_mind.make_Vampire()
+			possible_vampires.Remove(new_vampires_mind)
 
 /datum/objective/research_corrupt
 	explanation_text = "Используя свои перчатки, загрузите мощный вирус на любой научный сервер станции, тем самым саботировав все их исследования! \
@@ -1083,11 +1233,3 @@ GLOBAL_LIST_INIT(potential_theft_objectives, (subtypesof(/datum/theft_objective)
 	explanation_text = "Используя свои перчатки, загрузите в ИИ станции специальный вирус через консоль для смены законов которая стоит в загрузочной. \
 	Подойдёт только консоль в этой зоне из-за уязвимости оставленной заранее для вируса. \
 	Учтите, что установка займёт время и ИИ скорее всего будет уведомлён о вашей попытке взлома!"
-/*
-//Пока что я отказалась от этих взломов консоли ибо у нас консоли отличаются и их надо переписать. Плюс приглашать ещё антагов на нашу пати не комельфо.
-/datum/objective/security_scramble
-	explanation_text = "Use your gloves on a security console to set everyone to arrest at least once.  Note that the AI will be alerted once you begin!"
-
-/datum/objective/terror_message
-	explanation_text = "Use your gloves on a communication console in order to bring another threat to the station.  Note that the AI will be alerted once you begin!"
-*/

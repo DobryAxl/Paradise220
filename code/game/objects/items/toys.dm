@@ -1136,6 +1136,27 @@
 	icon_state = "plushie_nuke"
 	item_state = "plushie_nuke"
 
+/obj/item/toy/plushie/nianplushie
+	name = "nian plushie"
+	desc = "A silky nian plushie, straight from the nebula. Pull its antenna to hear it buzz!"
+	icon_state = "plushie_nian"
+	item_state = "plushie_nian"
+	var/cooldown = FALSE
+	var/mothbite = 'sound/voice/scream_moth.ogg'
+
+/obj/item/toy/plushie/nianplushie/attack(mob/M as mob, mob/user as mob)
+	playsound(loc, mothbite, 10, 1)	// Play bite sound in local area
+	return ..()
+
+/obj/item/toy/plushie/nianplushie/attack_self(mob/user)
+	if(cooldown)
+		return ..()
+
+	playsound(src, 'sound/voice/scream_moth.ogg', 10, 0)
+	visible_message("<span class='danger'>Buzzzz!</span>")
+	cooldown = TRUE
+	addtimer(VARSET_CALLBACK(src, cooldown, FALSE), 3 SECONDS)
+
 /obj/item/toy/plushie/slimeplushie
 	name = "slime plushie"
 	desc = "An adorable stuffed toy that resembles a slime. It is practically just a hacky sack."
@@ -1834,6 +1855,12 @@
 	desc = "The amnesiac Warden, from Space Life's SS12 figurine collection."
 	icon_state = "warden"
 	toysay = "Execute him for breaking in!"
+
+/obj/item/toy/figure/magistrate
+	name = "Magistrate action figure"
+	desc = "The relevant magistrate, from Space Life's SS12 figurine collection."
+	icon_state = "magistrate"
+	toysay = "To execute, or not to execute, that is the question."
 
 //////////////////////////////////////////////////////
 //				Magic 8-Ball / Conch				//

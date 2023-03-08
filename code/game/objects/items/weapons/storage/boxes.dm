@@ -1095,6 +1095,22 @@
 	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
 	new /obj/item/reagent_containers/hypospray/autoinjector(src)
 
+/obj/item/storage/box/soviet
+	name = "boxed survival kit"
+	desc = "A standard issue Soviet military survival kit."
+	icon_state = "box_soviet"
+
+/obj/item/storage/box/soviet/New()
+	..()
+	new /obj/item/clothing/mask/breath(src)
+	new /obj/item/tank/internals/emergency_oxygen/engi(src)
+	new /obj/item/reagent_containers/hypospray/autoinjector
+	new /obj/item/flashlight/flare(src)
+	new /obj/item/crowbar/red(src)
+	new /obj/item/kitchen/knife/combat(src)
+	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
+	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
+
 /obj/item/storage/box/clown
 	name = "clown box"
 	desc = "A colorful cardboard box for the clown"
@@ -1210,6 +1226,19 @@
 	contents = list()
 	new /obj/item/clothing/suit/space/hardsuit/wizard/shielded(src)
 	new /obj/item/clothing/shoes/magboots/wizard(src)
+
+/obj/item/storage/box/candythief
+	name = "набор радужных конфет"
+	desc = "Набор для самых маленьких и не уверенных в себе работников, обожающих простые пути, смешивая всевозможные в один. Поставляется с сосательной конфетой. Удобный набор если нужно где-то засесть и не выходить. Производитель не отвечает за возникающие акне и галлюцинации от вашего времяпровождения."
+	icon_state = "box_thief"
+
+/obj/item/storage/box/candythief/New()
+	..()
+	for(var/i in 0 to 5)
+		new /obj/item/reagent_containers/food/snacks/candy/gummybear/wtf(src)
+		new /obj/item/reagent_containers/food/snacks/candy/gummyworm/wtf(src)
+		new /obj/item/reagent_containers/food/snacks/candy/jellybean/wtf(src)
+	new /obj/item/reagent_containers/food/snacks/candy/sucker(src)
 
 #undef NODESIGN
 #undef NANOTRASEN

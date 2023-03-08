@@ -6,7 +6,6 @@
 	layer = OBJ_LAYER
 	can_buckle = TRUE
 	buckle_lying = FALSE // you sit in a chair, not lay
-	anchored = TRUE
 	resistance_flags = NONE
 	max_integrity = 250
 	integrity_failure = 25
@@ -32,6 +31,15 @@
 /obj/structure/chair/Move(atom/newloc, direct)
 	..()
 	handle_rotation()
+
+/obj/structure/chair/buckle_mob(mob/living/M, force, check_loc)
+	. = ..()
+	if(. && !movable)
+		anchored = TRUE
+
+/obj/structure/chair/unbuckle_mob(mob/living/buckled_mob, force)
+	anchored = initial(anchored)
+	. = ..()
 
 /obj/structure/chair/attackby(obj/item/W as obj, mob/user as mob, params)
 	if(istype(W, /obj/item/assembly/shock_kit))
@@ -67,7 +75,7 @@
 /obj/structure/chair/MouseDrop(over_object, src_location, over_location)
 	. = ..()
 	if(over_object == usr && Adjacent(usr))
-		if(!item_chair || has_buckled_mobs())
+		if(!item_chair || has_buckled_mobs() || anchored)
 			return
 		if(usr.incapacitated())
 			to_chat(usr, "<span class='warning'>You can't do that right now!</span>")
@@ -221,15 +229,16 @@
 	color = rgb(255,251,0)
 
 /obj/structure/chair/office
-	anchored = FALSE
 	movable = TRUE
 	item_chair = null
 	buildstackamount = 5
+	pull_push_speed_modifier = 1
 
 /obj/structure/chair/comfy/shuttle
 	name = "shuttle seat"
 	desc = "A comfortable, secure seat. It has a more sturdy looking buckling system, for smoother flights."
 	icon_state = "shuttle_chair"
+	anchored = TRUE
 
 /obj/structure/chair/comfy/shuttle/GetArmrest()
 	return mutable_appearance('icons/obj/chairs.dmi', "shuttle_chair_armrest")
@@ -267,6 +276,7 @@
 	icon_state = "barber_chair"
 	buildstackamount = 1
 	item_chair = null
+	anchored = TRUE
 
 // SOFAS
 /obj/structure/chair/sofa
@@ -392,9 +402,12 @@
 	plant(user)
 
 /obj/item/chair/proc/plant(mob/user)
+	if(QDELETED(src))
+		return
+
 	for(var/obj/A in get_turf(loc))
 		if(istype(A, /obj/structure/chair))
-			to_chat(user, "<span class='danger'>There is already a chair here.</span>")
+			to_chat(user, "<span class='danger'>There is already [A] here.</span>")
 			return
 
 	user.visible_message("<span class='notice'>[user] rights \the [src.name].</span>", "<span class='notice'>You right \the [name].</span>")
@@ -433,13 +446,6 @@
 				C.apply_effect(6, STUTTER, 0)
 				playsound(src.loc, 'sound/weapons/punch1.ogg', 50, 1, -1)
 		smash(user)
-
-/obj/item/chair/stool/attack_self(mob/user as mob)
-	..()
-	new origin_type(get_turf(loc))
-	user.unEquip(src)
-	user.visible_message("<span class='notice'>[user] puts [src] down.</span>", "<span class='notice'>You put [src] down.</span>")
-	qdel(src)
 
 /obj/item/chair/stool/attack(mob/M as mob, mob/user as mob)
 	if(prob(5) && istype(M,/mob/living))

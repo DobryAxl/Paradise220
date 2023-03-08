@@ -99,7 +99,9 @@
 	materials = list(MAT_GLASS=MINERAL_MATERIAL_AMOUNT)
 
 GLOBAL_LIST_INIT(sand_recipes, list(\
-		new /datum/stack_recipe("sandstone", /obj/item/stack/sheet/mineral/sandstone, 1, 1, 50)\
+		new /datum/stack_recipe("sandstone", /obj/item/stack/sheet/mineral/sandstone, 1, 1, 50), \
+		null, \
+		new /datum/stack_recipe("puddle", /obj/structure/sink/puddle, 30, 1, 1, 10 SECONDS, 1, 1)\
 		))
 
 /obj/item/stack/ore/glass/Initialize(mapload, new_amount, merge = TRUE)
@@ -400,6 +402,13 @@ GLOBAL_LIST_INIT(sand_recipes, list(\
 	sideslist = list("heads")
 	credits = 20
 
+/obj/item/coin/twoheaded/thief
+	name = "монета Гильдии Воров"
+	icon_state = "coin_thief_heads"
+	cmineral = "thief"
+	desc = "Монета Гильдии Воров, которую выдают каждому уважающему себя члену гильдии для взаимной идентификации. Странный сплав с изображением бюстов черной и белой кошки, стоящих спиной к спине. Ценится коллекционерами, и как правило у них же и возвращают."
+	credits = 600
+
 /obj/item/coin/antagtoken
 	name = "antag token"
 	icon_state = "coin_valid_valid"
@@ -412,6 +421,7 @@ GLOBAL_LIST_INIT(sand_recipes, list(\
 /obj/item/coin/antagtoken/syndicate
 	name = "syndicate coin"
 	credits = 160
+
 
 /obj/item/coin/attackby(obj/item/W as obj, mob/user as mob, params)
 	if(istype(W, /obj/item/stack/cable_coil))

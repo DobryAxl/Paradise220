@@ -49,6 +49,8 @@
 
 	O.rename_self("AI",1)
 
+	O.tts_seed = tts_seed
+
 	INVOKE_ASYNC(GLOBAL_PROC, .proc/qdel, src) // To prevent the proc from returning null.
 	return O
 
@@ -113,6 +115,8 @@
 	O.update_pipe_vision()
 
 	O.Namepick()
+
+	O.tts_seed = tts_seed
 
 	INVOKE_ASYNC(GLOBAL_PROC, .proc/qdel, src) // To prevent the proc from returning null.
 	return O
@@ -190,8 +194,6 @@
 			return 0
 	if(ispath(MP, /mob/living/simple_animal/pet/cat))
 		return 1
-	if(ispath(MP, /mob/living/simple_animal/pet/dog/detective))
-		return 1
 	if(ispath(MP, /mob/living/simple_animal/pet/dog/security))
 		return 1
 	if(ispath(MP, /mob/living/simple_animal/pet/dog/corgi))
@@ -223,7 +225,23 @@
 		return 1
 	if(ispath(MP, /mob/living/simple_animal/pig))
 		return 1
+	if(ispath(MP, /mob/living/simple_animal/cock))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/goose))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/turkey))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/mouse/hamster))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/mouse/rat))
+		return 1
 	if(ispath(MP, /mob/living/simple_animal/hostile/retaliate/poison/snake/rouge))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/possum))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/pet/slugcat))
+		return 1
+	if(ispath(MP, /mob/living/simple_animal/frog))
 		return 1
 
 	if(ispath(MP, /mob/living/simple_animal/borer) && !jobban_isbanned(src, ROLE_BORER) && !jobban_isbanned(src, "Syndicate"))

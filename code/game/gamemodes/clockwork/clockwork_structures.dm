@@ -100,7 +100,7 @@
 	max_integrity = 750 // A very important one
 	death_message = "<span class='danger'>The beacon crumbles and falls in parts to the ground relaesing it's power!</span>"
 	death_sound = 'sound/effects/creepyshriek.ogg'
-	var/heal_delay = 60
+	var/heal_delay = 6 SECONDS
 	var/last_heal = 0
 	var/area/areabeacon
 	var/areastring = null
@@ -125,12 +125,20 @@
 		for(var/mob/living/L in range(5, src))
 			if(!isclocker(L))
 				continue
+			if(L.reagents?.has_reagent("holywater"))
+				to_chat(L, "<span class='warning'>You feel a terrible liquid disappearing from your body.</span>")
+				L.reagents.del_reagent("holywater")
+			if(iscogscarab(L))
+				var/mob/living/silicon/robot/cogscarab/C = L
+				C.wind_up_timer = min(C.wind_up_timer + 25, CLOCK_MAX_WIND_UP_TIMER) //every 6 seconds gains 25 seconds. roughly, every second 5 to timer.
 			if(!(L.health < L.maxHealth))
 				continue
 			new /obj/effect/temp_visual/heal(get_turf(L), "#960000")
 
 			if(ishuman(L))
-				L.heal_overall_damage(10, 10, TRUE)
+				L.heal_overall_damage(10, 10, TRUE, FALSE, TRUE)
+			if(isrobot(L))
+				L.heal_overall_damage(5, 5, TRUE)
 
 			else if(isanimal(L))
 				var/mob/living/simple_animal/M = L
@@ -363,7 +371,7 @@
 			to_chat(user, "<span class='warning'>It has to be anchored before you can start!</span>")
 		if(!double_check(user, A))
 			return
-		GLOB.command_announcement.Announce("A high anomalous power has been detected in [A.map_name], the origin of the power indicates an attempt to summon eldtrich god named Ratvar. Disrupt the ritual at all costs, before the station is destroyed! Space law and SOP are suspended. The entire crew must kill cultists on sight.", "Central Command Higher Dimensional Affairs", 'sound/AI/spanomalies.ogg')
+		GLOB.command_announcement.Announce("Была обнаружена аномально высокая концентрация энергии в [A.map_name]. Источник энергии указывает на попытку вызвать потустороннего бога по имени Ратвар. Сорвите ритуал любой ценой, пока станция не была уничтожена! Действие космического закона и стандартных рабочих процедур приостановлено. Весь экипаж должен уничтожать культистов на месте.", "Отдел Центрального Командования по делам высших измерений.", 'sound/AI/spanomalies.ogg')
 		visible_message("<span class='biggerdanger'>[user] ominously presses [I] into [src] as the mechanism inside starts to shine!</span>")
 		user.unEquip(I)
 		qdel(I)
