@@ -1157,6 +1157,17 @@
 	construction_time = 100
 	category = list("Exosuit Equipment")
 
+/datum/design/mech_almg
+	name = "Exosuit Weapon (ALMG-90)"
+	desc = "Allows for the construction of ALMG-90."
+	id = "mech_ALMG"
+	build_type = MECHFAB
+	req_tech = list("combat" = 6, "magnets" = 6, "powerstorage" = 5)
+	build_path = /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/amlg
+	materials = list(MAT_METAL=10000,MAT_GLASS=2000)
+	construction_time = 100
+	category = list("Exosuit Equipment")
+
 /datum/design/mech_scattershot
 	name = "Exosuit Weapon (LBX AC 10 \"Scattershot\")"
 	desc = "Allows for the construction of LBX AC 10."
@@ -1310,6 +1321,16 @@
 	build_path = /obj/item/borg/upgrade/soh
 	req_tech = list("engineering" = 4, "materials" = 4, "bluespace" = 4)
 	materials = list(MAT_METAL = 10000, MAT_GOLD = 250, MAT_URANIUM = 500)
+	construction_time = 120
+	category = list("Cyborg Upgrade Modules")
+
+/datum/design/borg_upgrade_gps
+	name = "Cyborg Upgrade (GPS amplifier)"
+	id = "borg_upgrade_gps"
+	build_type = MECHFAB
+	build_path = /obj/item/borg/upgrade/gps
+	req_tech = list("engineerin" = 7, "programming" = 7, "materials" = 5, "magnets" = 6)
+	materials = list(MAT_METAL = 10000, MAT_GOLD = 2000, MAT_SILVER = 2000, MAT_TITANIUM = 500)
 	construction_time = 120
 	category = list("Cyborg Upgrade Modules")
 

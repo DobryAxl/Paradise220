@@ -6,10 +6,9 @@
 	var/list/species_restricted = null //Only these species can wear this kit.
 	var/scan_reagents = 0 //Can the wearer see reagents while it's equipped?
 	var/gunshot_residue //Used by forensics.
-	var/is_improoved_by_potion = FALSE //used for xenobio potions
+	var/obj/item/slimepotion/clothing/applied_slime_potion = null
 	var/list/faction_restricted = null
 	var/teleportation = FALSE //used for xenobio potions
-	var/slime_potions
 
 	/*
 		Sprites used when the clothing item is refit. This is done by setting icon_override.
@@ -749,6 +748,30 @@ BLIND     // can't see anything
 	QDEL_LIST(accessories)
 	return ..()
 
+
+/obj/item/clothing/under/dropped(mob/user, silent)
+	..()
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	if(H.get_item_by_slot(slot_w_uniform) == src)
+		for(var/obj/item/clothing/accessory/A in accessories)
+			A.attached_unequip()
+
+/obj/item/clothing/under/equipped(mob/user, slot, initial)
+	..()
+	if(!ishuman(user))
+		return
+	if(slot == slot_w_uniform)
+		for(var/obj/item/clothing/accessory/A in accessories)
+			A.attached_equip()
+
+/*
+  * # can_attach_accessory
+  *
+  * Arguments:
+  * * A - The accessory object being checked. MUST BE TYPE /obj/item/clothing/accessory
+*/
 /obj/item/clothing/under/proc/can_attach_accessory(obj/item/clothing/accessory/A)
 	if(istype(A))
 		. = TRUE

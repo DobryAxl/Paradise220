@@ -123,7 +123,7 @@ SUBSYSTEM_DEF(ticker)
 			mode.process_job_tasks()
 
 			if(world.time > next_autotransfer)
-				SSvote.autotransfer()
+				SSvote.start_vote(new /datum/vote/crew_transfer)
 				next_autotransfer = world.time + config.vote_autotransfer_interval
 
 			var/game_finished = SSshuttle.emergency.mode >= SHUTTLE_ENDGAME || mode.station_was_nuked
@@ -162,10 +162,12 @@ SUBSYSTEM_DEF(ticker)
 					if("random")
 						var/target_map = pick(all_maps)
 						SSmapping.next_map = new target_map
+					if("vote")
+						SSvote.start_vote(new /datum/vote/map)
 					else
 						SSmapping.next_map = SSmapping.map_datum
-
-			to_chat(world, "<B>The next map is - [SSmapping.next_map.name]!</B>")
+			if(SSmapping.next_map)
+				to_chat(world, "<B>The next map is - [SSmapping.next_map.name]!</B>")
 
 /datum/controller/subsystem/ticker/proc/setup()
 	cultdat = setupcult()
@@ -302,15 +304,12 @@ SUBSYSTEM_DEF(ticker)
 
 	if(config.restrict_maint)
 		for(var/obj/machinery/door/airlock/maintenance/M in GLOB.airlocks)
-			if(ACCESS_MAINT_TUNNELS == text2num(M.req_access_txt))
+			if(M.req_access && M.req_access.len == 1 && M.req_access[1] == ACCESS_MAINT_TUNNELS)
 				M.req_access = null
-				M.req_one_access = null
 				if(config.restrict_maint == 1)
-					M.req_access_txt = "0"
-					M.req_one_access_txt = "[ACCESS_BRIG];[ACCESS_ENGINE]"
+					M.req_access = list(ACCESS_BRIG, ACCESS_ENGINE)
 				if(config.restrict_maint == 2)
-					M.req_access_txt = "[ACCESS_BRIG]"
-					M.req_one_access_txt = "0"
+					M.req_access = list(ACCESS_BRIG)
 
 	// Sets the auto shuttle vote to happen after the config duration
 	next_autotransfer = world.time + config.vote_autotransfer_initial

@@ -255,7 +255,7 @@
 			. -= 0.5
 
 		var/ignoreslow = FALSE
-		if((H.status_flags & IGNORESLOWDOWN) || (RUN in H.mutations))
+		if((H.status_flags & IGNORESLOWDOWN) || (RUN in H.mutations) || (H.status_flags & GODMODE))
 			ignoreslow = TRUE
 
 		var/flight = H.flying	//Check for flight and flying items
@@ -265,15 +265,15 @@
 		if(H.status_flags & IGNORE_SPEED_CHANGES)
 			return .
 
-		if(H.wear_suit)
+		if(H.wear_suit && !H.wear_suit.is_speedslimepotioned)
 			ADD_SLOWDOWN(H.wear_suit.slowdown)
-		if(!H.buckled && H.shoes)
+		if(!H.buckled && H.shoes && !H.shoes.is_speedslimepotioned)
 			ADD_SLOWDOWN(H.shoes.slowdown)
-		if(H.back)
+		if(H.back && !H.back.is_speedslimepotioned)
 			ADD_SLOWDOWN(H.back.slowdown)
-		if(H.l_hand && (H.l_hand.flags & HANDSLOW))
+		if(H.l_hand && (H.l_hand.flags & HANDSLOW) && !H.l_hand.is_speedslimepotioned)
 			ADD_SLOWDOWN(H.l_hand.slowdown)
-		if(H.r_hand && (H.r_hand.flags & HANDSLOW))
+		if(H.r_hand && (H.r_hand.flags & HANDSLOW) && !H.r_hand.is_speedslimepotioned)
 			ADD_SLOWDOWN(H.r_hand.slowdown)
 
 		if(ignoreslow)
@@ -674,7 +674,7 @@
 
 			if(!H.w_uniform && !nojumpsuit && (!O || !(O.status & ORGAN_ROBOT)))
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(!(I.slot_flags & SLOT_BELT))
 				return
@@ -696,7 +696,7 @@
 
 			if(!H.w_uniform && !nojumpsuit && (!O || !(O.status & ORGAN_ROBOT)))
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(!(I.slot_flags & SLOT_ID))
 				return FALSE
@@ -708,7 +708,7 @@
 
 			if(!H.w_uniform && !nojumpsuit && (!O || !(O.status & ORGAN_ROBOT)))
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(!(I.slot_flags & SLOT_PDA))
 				return FALSE
@@ -722,7 +722,7 @@
 
 			if(!H.w_uniform && !nojumpsuit && (!O || !(O.status & ORGAN_ROBOT)))
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(I.slot_flags & SLOT_DENYPOCKET)
 				return
@@ -737,7 +737,7 @@
 
 			if(!H.w_uniform && !nojumpsuit && (!O || !(O.status & ORGAN_ROBOT)))
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(I.slot_flags & SLOT_DENYPOCKET)
 				return FALSE
@@ -751,15 +751,11 @@
 				return FALSE
 			if(!H.wear_suit)
 				if(!disable_warning)
-					to_chat(H, "<span class='alert'>Вам нужен костюм перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='alert'>Вам нужен костюм перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			if(!H.wear_suit.allowed)
 				if(!disable_warning)
 					to_chat(H, "Вы как-то достали костюм без хранения разрешенных предметов. Прекратите это.")
-				return FALSE
-			if(I.w_class > WEIGHT_CLASS_BULKY)
-				if(!disable_warning)
-					to_chat(H, "[name] слишком большой, чтобы прикрепить.")
 				return FALSE
 			if(istype(I, /obj/item/pda) || istype(I, /obj/item/pen) || is_type_in_list(I, H.wear_suit.allowed))
 				return TRUE
@@ -777,7 +773,7 @@
 		if(slot_tie)
 			if(!H.w_uniform)
 				if(!disable_warning)
-					to_chat(H, "<span class='warning'>Вам нужен комбинезон перед тем как вы сможете прикрепить [name].</span>")
+					to_chat(H, "<span class='warning'>Вам нужен комбинезон перед тем как вы сможете прикрепить [I].</span>")
 				return FALSE
 			var/obj/item/clothing/under/uniform = H.w_uniform
 			if(uniform.accessories.len && !uniform.can_attach_accessory(H))
